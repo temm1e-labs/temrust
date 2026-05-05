@@ -6,52 +6,45 @@ Q1–Q5 answered 2026-05-05 after the agentic-coding pivot. Q6–Q10 still need 
 
 ## ANSWERED
 
-### Q1 — Which axis of "smart"? ✅ **Agentic coding capability per parameter**
-Specifically: GitHub-issue → patch resolution. Verifiable via test pass. Not "general intelligence" — that's vapor at small scale and the field knows it.
+### Q1 — Which axis of "smart"? ✅ **Agentic coding capability per parameter, at the 1B-class size**
+Specifically: GitHub-issue → patch resolution at 1.7B params. Verifiable via test pass. The "1.7B beats 3B" surprise is the framing.
 
-### Q2 — Build new or beat existing? ✅ **Beat existing**
-Win condition: 7B dense matches DeepSWE-Preview-32B on SWE-bench Verified, top-3 open at ≤7B on SWE-bench Pro.
+### Q2 — Build new or beat existing? ✅ **Beat existing at the 1B-class size**
+Win condition: 1.7B dense beats Qwen2.5-Coder-3B-Instruct on SWE-bench Lite. (Pivoted from 7B/$25-65K plan to 1.7B/$500/solo on 2026-05-05.)
 
-### Q3 — Corpus definition? ✅ **Agent trajectory data, not "high-IQ canon"**
-Mix: R2E-Gym (primary), SWE-Gym, Agent-FLAN, AceCoder, OpenHands traces, Llama-Nemotron-Post-Training agentic subset, Phase-2 synthetic from open teachers. The "top 1% literature" framing is dropped — agents need StackOverflow, error logs, and broken APIs, not Tolstoy.
+### Q3 — Corpus definition? ✅ **Agent trajectory data + 10–20% reasoning supplement (the canon-thesis ablation)**
+- **Primary (80–90%):** R2E-Gym, AceCoder, OpenHands trajectories, Tulu-3 (filtered for tool use), Phase-2 synthetic from open teachers.
+- **Reasoning supplement (10–20%):** MetaMathQA, OpenMathInstruct-2, algorithm derivations. **This is the salvaged piece of the original canon thesis** — not as the main corpus, but as a "reasoning stiffener" mixed into SFT. **Run with-vs-without ablation; this IS the originality lever.**
+- **Dropped:** literature, philosophy, "top 1% canon." Doesn't help coding agents. Inherited via base-model pretraining anyway.
 
 ### Q4 — Distillation source? ✅ **Open teachers at v0**
 DeepSeek-V3.1, Qwen3-Coder-Next, or self-improving Phase-1 model. No Claude / GPT-5 unless an explicit ToS review clears it.
 
-### Q5 — Base or scratch? ✅ **Post-train on existing strong base**
-Candidates: Qwen2.5-Coder-7B-Base, DeepSeek-Coder-V3-7B, Qwen3-Coder dense 7B if/when released. Decision in Phase 0 after baseline evals.
+### Q5 — Base or scratch? ✅ **Post-train on Qwen3-1.7B-Base**
+Primary: Qwen3-1.7B-Base (Mar 2026 release, matches Qwen2.5-3B-Base on benchmarks, Apache-2.0). Fallback: Qwen2.5-Coder-1.5B-Base. Decision finalised after Phase 0 baseline runs. Stretch (post-success): 0.6B distillation.
 
 ---
 
-## PENDING
+## PENDING (Q9, Q10) — Q6, Q7, Q8 answered 2026-05-05
 
-### Q6 — Eval suite final composition?
+### Q6 — Eval suite final composition? ✅
 
-Locked in `PLAN.md` §0 win condition:
-- SWE-bench Verified (primary, but contaminated)
-- SWE-bench Pro (contamination-resistant)
-- SWE-bench-Live (rolling)
+Locked in `PLAN.md` §0:
+- **Primary:** SWE-bench Lite (vs Qwen2.5-Coder-3B-Instruct as the bar)
+- SWE-bench Verified ≥ 20% (sample 100 issues if full 500 is too expensive)
+- **Private holdout: 30–50 post-cutoff GitHub issues — release-gate metric, manually curated by Quan**
 - τ-bench (tool use)
-- Private holdout of 50–100 post-cutoff GitHub issues (release-gate metric)
+- Inference: ≥ 20 tok/s on M3 Pro at int4
 
-**Open sub-question:** how do we source the private holdout? Manual curation is the safest answer; partial automation (filter for "issues with merged-fix PRs in last 30 days, repo with passing CI") is faster. **Decision needed: who builds it, and how big?**
+### Q7 — Solo or collaborator? ✅ **Solo**
+Quan only. No collaborator at v0. Mitigation for the data-pipeline-bug risk: daily distribution sanity-checks, commit datasets to git LFS, weekly self-review of pipeline diffs.
 
-### Q7 — Solo or collaborator?
-
-The single largest project risk per `PLAN.md` §6 is silent data-pipeline bugs. A collaborator on data engineering (Phase 1–2) cuts this risk dramatically.
-
-**Decision needed:** solo, or recruit one ML/data engineer? Where would they come from?
-
-### Q8 — Compute budget commitment?
-
-Plan calls for **$25K–65K** total over 6 months. State a number. Possible sources:
-- Self-funded
-- Anthropic / OpenAI / Cohere research-credit programs
-- Lambda Labs Research Cloud credits
-- AWS / GCP startup credits via existing entity
-- Crowdfunding for an open-weights release
-
-**Decision needed: budget envelope and source.**
+### Q8 — Compute budget? ✅ **$500 hard cap**
+Self-funded. Phase-by-phase sub-caps in `PLAN.md` §6. Spend rules:
+- Lambda Labs spot A100 ($1.50/hr) = default rental
+- Kaggle T4 (30 hrs/week free) and Colab T4 = free runs
+- Track every USD in `BUDGET_LOG.md` (to be created Phase 0)
+- Weekly burn review; if any phase exceeds its ceiling, stop and re-plan
 
 ### Q9 — Open or closed?
 
