@@ -22,7 +22,7 @@ Runs at ≥ 30 tok/s on M3 Pro at int4 (Q4_K_M GGUF, ~1 GB).
 
 Frontier LLMs (Claude, GPT) are notably weaker on Rust than on Python. They get borrow-checker fixes wrong, hallucinate trait bounds, and produce non-idiomatic code. **There is no top open small Rust coding specialist.** Tem-Rust fills the niche.
 
-The project is built on a $500 budget by a solo dev with Claude Code as autonomous executor. Total user time across the 10-week build: ≤ 90 minutes.
+The project is built on a **$200 zero-risk budget** by a solo dev with Claude Code as autonomous executor. Expected committed spend: ~$35. Reserve: ~$165 (82% margin). Total user time across the 6-8 week build: ≤ 60 minutes.
 
 ---
 

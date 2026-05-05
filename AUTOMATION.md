@@ -4,21 +4,24 @@ The user is hands-off. Claude Code is the executor. This document is the protoco
 
 ---
 
-## What the user provides ONCE (≤ 30 min)
+## What the user provides ONCE (≤ 20 min)
 
-1. **Lambda Labs account + API key**
-   - Sign up at lambdalabs.com, fund with $500
-   - Create API key in dashboard
-   - Save key to `~/.config/temllm/lambda.env` (NOT in repo)
+1. **RunPod account + API key** (replaces Lambda)
+   - Sign up at runpod.io, fund with $200
+   - Create API key in dashboard → Settings → API Keys
+   - Save to `~/.config/temllm/runpod.env` (NOT in repo)
 2. **HuggingFace write token**
    - Create at huggingface.co/settings/tokens with `write` scope
    - Save to `~/.config/temllm/hf.env`
-3. **GitHub Personal Access Token**
-   - Create at github.com/settings/tokens with `repo`, `workflow` scopes
-   - Save to `~/.config/temllm/gh.env`
-4. **Optional: Weights & Biases API key** (free tier sufficient)
+3. **GitHub Personal Access Token** — already provided per user
+   - User has stated this is available
+   - Save to `~/.config/temllm/gh.env` if not already
+4. **Together AI account + API key** (for teacher inference)
+   - Sign up at together.ai (often comes with $5-25 free credit)
+   - Save to `~/.config/temllm/together.env`
+5. **Optional: Weights & Biases API key** (free tier sufficient)
    - Save to `~/.config/temllm/wandb.env`
-5. **Budget authorisation** (in-session, written): "I authorise up to $500 total for Tem-Rust v1."
+6. **Budget authorisation** (in-session, written): "I authorise up to $200 total for Tem-Rust v1."
 
 After these are in place, Claude Code can launch GPU instances, train, eval, push checkpoints, publish artifacts — without further per-action permission until the $500 cap.
 
@@ -27,7 +30,7 @@ After these are in place, Claude Code can launch GPU instances, train, eval, pus
 ## What the user does PERIODICALLY (≤ 15 min/week)
 
 1. **Open a Claude Code session weekly:** "Continue Tem-Rust." Claude reads `STATUS.md` and resumes.
-2. **Approve any single transaction > $50** when prompted. Claude will pause and ask.
+2. **Approve any single transaction > $30** when prompted. Claude will pause and ask.
 3. **Review milestone reports** at end of each phase (Claude posts to STATUS.md and pings).
 4. **Approve r/rust launch post + crates.io publish** at Phase 5 (only "public ship" actions need user sign-off).
 
@@ -37,7 +40,7 @@ After these are in place, Claude Code can launch GPU instances, train, eval, pus
 
 Within the $500 envelope, Claude Code:
 
-- Provisions Lambda Labs A100 instances via API
+- Provisions RunPod A100 40GB Community instances via API
 - Launches training/inference jobs with auto-shutdown
 - Polls HuggingFace for checkpoint completion
 - Crawls GitHub for Rust issues (using user's GH token)
@@ -92,18 +95,22 @@ Training runs are 3–24 hours. Claude Code sessions are shorter. Solution: **la
 ### Launch
 ```python
 # scripts/launch_train.py
-import lambdalabs
-client = lambdalabs.Client(api_key=os.environ["LAMBDA_API_KEY"])
+import runpod
 
-instance = client.launch(
-    instance_type="gpu_1x_a100_sxm4",
-    region="us-west-1",
-    ssh_keys=["temllm-key"],
-    file_system_names=["temllm-data"],
-    user_data=open("scripts/cloud_init.sh").read(),  # startup script
+runpod.api_key = os.environ["RUNPOD_API_KEY"]
+
+pod = runpod.create_pod(
+    name="temrust-train",
+    image_name="runpod/pytorch:2.6-cuda12.4-py3.11",
+    gpu_type_id="NVIDIA A100 PCIe 40GB",
+    cloud_type="COMMUNITY",  # cheapest tier
+    docker_args=open("scripts/cloud_init.sh").read(),
+    container_disk_in_gb=50,
+    volume_in_gb=20,
+    env={"HF_TOKEN": "...", "WANDB_KEY": "...", "TOGETHER_KEY": "..."},
 )
-print(f"Launched {instance.id}")
-# startup script does: clone repo, run training, push to HF, shutdown
+print(f"Launched {pod['id']}")
+# startup script does: clone repo, run training, push to HF, terminate self
 ```
 
 ### Poll
@@ -139,13 +146,14 @@ The `shutdown -h now` is critical: Lambda bills until instance halts. Auto-shutd
 
 | Failure | Detection | Recovery |
 |---|---|---|
-| Lambda spot instance preempted | API status check on poll | Re-launch with checkpoint resume; log $loss to BUDGET_LOG |
+| RunPod spot instance preempted | API status check on poll | Re-launch with checkpoint resume; log $loss to BUDGET_LOG |
 | Training NaN / loss explosion | wandb alert + log parse | Kill instance, debug config, re-launch with adjusted LR |
 | Cargo verification timeout | timeout=30s per task | Mark example as failed, drop from corpus |
 | HF rate limit on push | API error | Exponential backoff retry; max 6 attempts |
 | GitHub rate limit on crawl | API error 429 | Sleep until reset; resume crawl |
-| Cloud GPU price spike | pre-launch price check | Switch to RunPod or vast.ai if Lambda > $2/hr |
+| Cloud GPU price spike | pre-launch price check | Switch to vast.ai if RunPod A100 > $1/hr |
 | Out of credentials | API auth error | Pause, ask user to refresh tokens |
+| Together AI rate limit / outage | API error | Switch to DeepInfra ($0.30/Mtok); fallback DSR1-Distill-14B self-hosted |
 | Eval script bug | self-test before run | Run on 1 known-good baseline first; abort if score nonsensical |
 
 ---
@@ -182,32 +190,32 @@ Files Claude Code does NOT touch:
 
 ## What This Looks Like in Practice
 
-**Day 0 (user, 30 min):**
-- Sets up Lambda + HF + GitHub credentials
-- Says "Authorise $500. Go."
+**Day 0 (user, 20 min):**
+- Sets up RunPod + HF + Together credentials (GitHub already provided)
+- Says "Authorise $200. Go."
 
-**Day 1–14 (Claude Code, autonomous):**
-- Phase 0 baselines done, $20 spent
+**Day 1–10 (Claude Code, autonomous):**
+- Phase 0 baselines done across 6 candidate bases, $10 spent
 - Phase 1 data crawl done, 5K examples ready, $0 spent
 - STATUS.md and BUDGET_LOG.md updated daily
 
-**Day 15 (user, 5 min):**
+**Day 11 (user, 5 min):**
 - Opens session, sees Phase 1 done. Says "continue."
 
-**Day 15–35 (Claude Code, autonomous):**
-- Phase 2 SFT v0 trained, $30 spent
-- Phase 3 synthetic generated + v1 trained, $45 spent
-- v1 evaluated; meets §0 bar
+**Day 11–28 (Claude Code, autonomous):**
+- Phase 2 SFT v0 trained, $10 spent
+- Phase 3 synthetic generated + v1 trained, $10 spent
+- v1 evaluated; meets §0 bar (Phase 4 skipped per zero-risk)
 
-**Day 36 (user, 5 min):**
-- Reviews milestone. Decides to skip Phase 4 (saves $50) and ship.
+**Day 29 (user, 5 min):**
+- Reviews milestone. Approves Phase 5.
 
-**Day 37–50 (Claude Code, autonomous):**
+**Day 29–42 (Claude Code, autonomous):**
 - Phase 5: quantize, build CLI, write blog, draft launch post
 - Pauses for user approval on r/rust post + crates.io publish
 
-**Day 51 (user, 10 min):**
+**Day 43 (user, 10 min):**
 - Approves launch.
 - Tem-Rust-1.7B is live on HuggingFace + crates.io + r/rust.
 
-**Total user time: ≤ 90 min. Total spend: $105–155 + reserve. Total wall time: ~10 weeks.**
+**Total user time: ≤ 60 min. Total spend: $35 typical, $200 hard cap. Total wall time: ~6-8 weeks.**

@@ -1,6 +1,6 @@
-# PLAN — Tem-Rust-1.7B (Solo, $500, Autonomous)
+# PLAN — Tem-Rust-1.7B (Solo, $200, Autonomous, Zero-Risk)
 
-**Locked 2026-05-05** after three pivots. This is the build plan, not a research plan. When earlier docs disagree, this wins.
+**Locked 2026-05-05** (revised same day for zero-risk + $200 budget). This is the build plan, not a research plan. When earlier docs disagree, this wins.
 
 ---
 
@@ -30,31 +30,35 @@ Ship **Tem-Rust-1.7B**, a 1.7B Rust coding specialist. By end of project:
 | Constraint | Value |
 |---|---|
 | Param size | 1.7B dense (Qwen3-1.7B-Base) |
-| Compute budget | **$500 hard cap** |
+| Compute budget | **$200 hard cap** ($35 committed, $165 reserve = 82% margin) |
 | Headcount | 1 (Quan, hands-off) + Claude Code as autonomous executor |
-| Calendar time | ~10 weeks |
+| Calendar time | ~6-8 weeks |
 | License | Apache-2.0 (weights + recipe + CLI) |
-| Teacher | Qwen3-Coder-Next (open, MoE 3B-active, primary) OR DSR1-Distill-Qwen-14B (open, MIT, fallback) |
-| GPU vendor | Lambda Labs spot A100 80GB ($1.49/hr) |
+| Teacher | Qwen3-Coder-Next (open, MoE 3B-active) via **Together AI hosted inference** ($0.40/Mtok) |
+| GPU vendor | **RunPod A100 PCIe 40GB Community** ($0.60/hr) — 60% cheaper than prior Lambda quote |
+| Risk posture | **Zero-risk: GRPO Phase 4 SKIPPED** (RL at 1.7B is the highest single failure mode) |
 
 ---
 
-## §2. Architecture
+## §2. Architecture (best available May 2026)
 
-| Component | Choice |
-|---|---|
-| Base | Qwen3-1.7B-Base (Apache-2.0) — fallback Qwen2.5-Coder-1.5B-Base |
-| Adapter | QLoRA: 4-bit NF4 base + rank-16 / α-32 / dropout-0.05 LoRA |
-| Targets | q/k/v/o + gate/up/down (full attention + MLP) |
-| Optimizer | AdamW 8-bit |
-| LR / schedule | 2e-4 / cosine, warmup 0.03 |
-| Sequence length | 8K |
-| Batch | per-device 1, grad-accum 32 (eff = 32) |
-| Precision | bf16 |
-| Output quant | int4 NF4 GGUF (Q4_K_M); also Q5_K_M and Q2_K |
-| Inference (Mac) | llama.cpp / Ollama |
-| Training framework | Unsloth (single-GPU king); Axolotl YAML for orchestration |
-| RL framework (Phase 4) | Unsloth GRPO; TRL fallback |
+| Component | Choice | Why best |
+|---|---|---|
+| Base (primary) | **Qwen3-1.7B-Base** (Apache-2.0, [HF](https://huggingface.co/Qwen/Qwen3-1.7B-Base)) | Strongest open 1.7B base; matches Qwen2.5-3B-Base on benchmarks |
+| Base (fallback A) | Qwen3.5-2B-Base (Mar 2026 release) | Newer arch, slightly larger; Phase 0 baselines pick winner |
+| Base (fallback B) | Qwen2.5-Coder-1.5B-Base | Already code-tuned; safety net |
+| Adapter | QLoRA: 4-bit NF4 base + rank-16 / α-32 / dropout-0.05 LoRA | 2026 default; proven |
+| Targets | q/k/v/o + gate/up/down | Full attention + MLP reach |
+| Optimizer | AdamW 8-bit | Memory-efficient |
+| LR / schedule | 2e-4 / cosine, warmup 0.03 | Unsloth defaults |
+| Sequence length | **4K** (was 8K) | Most Rust files fit; 30% faster training |
+| Batch | per-device 1, grad-accum 32 (eff = 32) | Standard |
+| Precision | bf16 | Standard |
+| Output quant | int4 NF4 GGUF (Q4_K_M); also Q5_K_M and Q2_K | M-series Mac native |
+| Inference (Mac) | llama.cpp / Ollama | Standard |
+| Training framework | **Unsloth + Axolotl YAML** | Single-GPU king (2-5× faster, 80% less VRAM) |
+| Teacher | **Qwen3-Coder-Next (80B/3B-active MoE)** via Together AI | Best open coding teacher; hosted = no self-host cost |
+| Compute provider | **RunPod A100 40GB Community** ($0.60/hr) | Cheapest reliable A100 in 2026 |
 
 ---
 
@@ -146,16 +150,10 @@ Hand-curated. Held back from training. Released publicly alongside the model. Be
 
 **Exit criterion:** v1 beats v0 by ≥ 5 pts on TemRust-Issue.
 
-### Phase 4 — GRPO Mini-RL (Week 7–9, $50, OPTIONAL)
-- Use 200 R2E-Gym-style Rust tasks (built from Phase 1 data)
-- Unsloth GRPO with `cargo test` reward (binary +1/0)
-- Curriculum: easy → hard
-- Hard cap: 24 hrs ($36) on A100 + $5 eval = $41 worst case (under $50 ceiling)
-- **If v1 already meets §0 win condition, SKIP this phase** and save the budget
+### Phase 4 — SKIPPED (zero-risk decision)
+GRPO at 1.7B is the highest-risk step in the pipeline (literature: convergence at <3B is uncharted). Skipped entirely in the zero-risk plan. If v1 dramatically misses the §0 bar AND reserve budget is healthy, can be re-added by user authorisation.
 
-**Exit criterion:** v2 (RL'd) beats v1 by ≥ 3 pts on TemRust-Issue, OR phase skipped if v1 met bar.
-
-### Phase 5 — Quantize, Package, Ship (Week 9–10, $10)
+### Phase 5 — Quantize, Package, Ship (Week 7–8, $5)
 - Quantize best checkpoint to GGUF: Q4_K_M (default), Q5_K_M (high), Q2_K (mobile)
 - Verify ≥ 30 tok/s on M3 Pro at Q4_K_M
 - Build CLI tool `tem-rust` in Rust:
@@ -211,14 +209,19 @@ Claude Code is the executor. See `AUTOMATION.md` for the protocol.
 | 2026-05-05 | Pivot 3: research → product | Owner wants something people use, not A/B |
 | 2026-05-05 | Pivot 4: generic → Rust specialist | Niche uncontested; cargo = perfect verifier; aligns with TEMM1E |
 | 2026-05-05 | Distribution: HF + crates.io + r/rust | Rust-native distribution channels |
-| 2026-05-05 | Eval: build TemRust-* (250 tasks, cargo-verified) | Own the benchmark = own the moat |
+| 2026-05-05 | Eval: build TemRust-* (200 tasks, cargo-verified) | Own the benchmark = own the moat |
+| 2026-05-05 | **Pivot 5: $500 → $200 zero-risk** | User-set tighter budget; risk reduction priority |
+| 2026-05-05 | Skip Phase 4 (GRPO) | Highest single failure mode at 1.7B |
+| 2026-05-05 | Switch to RunPod A100 40GB ($0.60/hr) from Lambda ($1.49/hr) | 60% cost reduction; sufficient VRAM |
+| 2026-05-05 | Teacher: Qwen3-Coder-Next via Together AI hosted | Best open coding teacher; per-token pricing |
+| 2026-05-05 | Reduce eval to 200 tasks; seq length to 4K | Speed up runs without losing quality |
 
 ---
 
 ## §9. Next Action
 
-1. User authorises $500 budget + provides Lambda + HF + GitHub credentials
-2. I provision cloud, run Phase 0 baselines, build eval harness
-3. Phase 0 milestone report at end of Week 2 → user reviews → Phase 1 starts
+1. User authorises **$200** budget + provides RunPod + HF + GitHub credentials
+2. I provision RunPod A100 40GB, run Phase 0 baselines on Qwen3-1.7B-Base + Qwen3.5-2B-Base + Qwen2.5-Coder-1.5B-Base, build eval harness
+3. Phase 0 milestone report at end of Week 1-2 → user reviews → Phase 1 starts
 
 **Status: awaiting user go-ahead.**
