@@ -1,78 +1,47 @@
-# OPEN QUESTIONS — Decided & Pending
+# OPEN QUESTIONS
 
-Q1–Q5 answered 2026-05-05 after the agentic-coding pivot. Q6–Q10 still need decisions before Phase 0 is complete. See `PLAN.md` for the locked plan.
+Almost all questions are now answered. Only one remains: **go / no-go**. See `PLAN.md` for the locked plan.
 
 ---
 
 ## ANSWERED
 
-### Q1 — Which axis of "smart"? ✅ **Agentic coding capability per parameter, at the 1B-class size**
-Specifically: GitHub-issue → patch resolution at 1.7B params. Verifiable via test pass. The "1.7B beats 3B" surprise is the framing.
-
-### Q2 — Build new or beat existing? ✅ **Beat existing at the 1B-class size**
-Win condition: 1.7B dense beats Qwen2.5-Coder-3B-Instruct on SWE-bench Lite. (Pivoted from 7B/$25-65K plan to 1.7B/$500/solo on 2026-05-05.)
-
-### Q3 — Corpus definition? ✅ **Agent trajectory data + 10–20% reasoning supplement (the canon-thesis ablation)**
-- **Primary (80–90%):** R2E-Gym, AceCoder, OpenHands trajectories, Tulu-3 (filtered for tool use), Phase-2 synthetic from open teachers.
-- **Reasoning supplement (10–20%):** MetaMathQA, OpenMathInstruct-2, algorithm derivations. **This is the salvaged piece of the original canon thesis** — not as the main corpus, but as a "reasoning stiffener" mixed into SFT. **Run with-vs-without ablation; this IS the originality lever.**
-- **Dropped:** literature, philosophy, "top 1% canon." Doesn't help coding agents. Inherited via base-model pretraining anyway.
-
-### Q4 — Distillation source? ✅ **Open teachers at v0**
-DeepSeek-V3.1, Qwen3-Coder-Next, or self-improving Phase-1 model. No Claude / GPT-5 unless an explicit ToS review clears it.
-
-### Q5 — Base or scratch? ✅ **Post-train on Qwen3-1.7B-Base**
-Primary: Qwen3-1.7B-Base (Mar 2026 release, matches Qwen2.5-3B-Base on benchmarks, Apache-2.0). Fallback: Qwen2.5-Coder-1.5B-Base. Decision finalised after Phase 0 baseline runs. Stretch (post-success): 0.6B distillation.
+| Q | Answer | Locked |
+|---|---|---|
+| Q1 — axis of "smart"? | Best Rust coding agent at 1.7B | 2026-05-05 |
+| Q2 — build new or beat existing? | Beat existing on Rust-specific eval | 2026-05-05 |
+| Q3 — corpus? | `cargo`-verified Rust trajectories (issues, compile errors, test pairs, clippy) | 2026-05-05 |
+| Q4 — teacher? | Qwen3-Coder-Next (primary) or DSR1-Distill-Qwen-14B (fallback). Open only. | 2026-05-05 |
+| Q5 — base? | Qwen3-1.7B-Base (fallback Qwen2.5-Coder-1.5B-Base) | 2026-05-05 |
+| Q6 — eval? | TemRust-* (Borrow, Type, Test, Clippy, Issue) — 250 tasks, hand-curated, `cargo`-verified | 2026-05-05 |
+| Q7 — solo or collab? | Solo + Claude Code as autonomous executor | 2026-05-05 |
+| Q8 — budget? | $500 hard cap, self-funded | 2026-05-05 |
+| Q9 — open or closed? | Apache-2.0 weights + recipe + CLI; HuggingFace + crates.io | 2026-05-05 |
+| Q10 — done criterion? | §0 win condition met → public release on HF + crates.io + r/rust launch post | 2026-05-05 |
 
 ---
 
-## PENDING (Q9, Q10) — Q6, Q7, Q8 answered 2026-05-05
+## REMAINING
 
-### Q6 — Eval suite final composition? ✅
+### Q11 — Go / no-go?
 
-Locked in `PLAN.md` §0:
-- **Primary:** SWE-bench Lite (vs Qwen2.5-Coder-3B-Instruct as the bar)
-- SWE-bench Verified ≥ 20% (sample 100 issues if full 500 is too expensive)
-- **Private holdout: 30–50 post-cutoff GitHub issues — release-gate metric, manually curated by Quan**
-- τ-bench (tool use)
-- Inference: ≥ 20 tok/s on M3 Pro at int4
+User must:
+1. Set up credentials (Lambda + HF + GitHub) per `AUTOMATION.md` §1
+2. Authorise the $500 budget in writing in-session
+3. Say "Go" — Phase 0 starts immediately
 
-### Q7 — Solo or collaborator? ✅ **Solo**
-Quan only. No collaborator at v0. Mitigation for the data-pipeline-bug risk: daily distribution sanity-checks, commit datasets to git LFS, weekly self-review of pipeline diffs.
+**Status: pending.**
 
-### Q8 — Compute budget? ✅ **$500 hard cap**
-Self-funded. Phase-by-phase sub-caps in `PLAN.md` §6. Spend rules:
-- Lambda Labs spot A100 ($1.50/hr) = default rental
-- Kaggle T4 (30 hrs/week free) and Colab T4 = free runs
-- Track every USD in `BUDGET_LOG.md` (to be created Phase 0)
-- Weekly burn review; if any phase exceeds its ceiling, stop and re-plan
+### Q12 — Connection to TEMM1E?
 
-### Q9 — Open or closed?
+Deferred to Phase 5. Two ship options:
+- (a) Tem-Rust-1.7B as the brain inside TEMM1E's Rust runtime — natural fit
+- (b) Tem-Rust-1.7B as a fully independent product, TEMM1E uses it OR uses frontier APIs
 
-Options:
-- (a) Apache-2.0 weights + recipe + technical report (max impact, no commercial moat)
-- (b) Weights closed, recipe published (some moat, less community pickup)
-- (c) Closed end-to-end (full moat, high risk it never pays back)
+**Decide at Phase 5 based on TEMM1E's state at that point.**
 
-**Recommendation:** (a). The Phi/DeepSeek/Qwen lesson is that visibility >> moat for a project of this size. But this is a strategic decision, not a default.
+### Q13 — Landing page domain?
 
-**Open sub-question:** licence of training data. R2E-Gym is Apache, SWE-Gym is permissive, Llama-Nemotron is mixed — must check before any release.
+Default: GitHub Pages at `tem-llm.github.io`. User can override with custom domain (`tem-rust.dev` etc.) at Phase 5.
 
-### Q10 — Done criterion?
-
-`PLAN.md` §0 has the metric version. The strategic version is still open:
-- (a) Hit win condition → public release → technical report → done.
-- (b) Hit win condition → public release → keep iterating to push frontier further.
-- (c) Build into a product (CLI tool, IDE extension, hosted endpoint).
-
-**Decision needed:** what does "shipped" mean for this project?
-
----
-
-## Connection to wider Tem / TEMM1E?
-
-Still open. Possible connections:
-- TemLLM as the LLM that powers the agentic core in TEMM1E (Rust runtime calls a local TemLLM for code-related actions)
-- TemLLM and TEMM1E are intentionally separate projects with shared branding only
-- TemLLM as a research playground; TEMM1E uses frontier APIs in production
-
-**Decision needed.** If TemLLM is meant to power TEMM1E locally, the deployment surface (M-series Mac, no cloud GPU) becomes a hard constraint and may push the param target down to 4B or even lower. This single decision can change Phase 4.
+**Decide at Phase 5.**

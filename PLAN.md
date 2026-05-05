@@ -1,24 +1,27 @@
-# PLAN — Best Open ≤2B Coding Agent (Solo, $500)
+# PLAN — Tem-Rust-1.7B (Solo, $500, Autonomous)
 
-**Locked 2026-05-05** after second pivot from 7B/$25-65K to **1.7B/$500/solo**. This document is authoritative. When earlier docs disagree, this wins.
+**Locked 2026-05-05** after three pivots. This is the build plan, not a research plan. When earlier docs disagree, this wins.
 
 ---
 
-## §0. Win Condition (recalibrated)
+## §0. Win Condition
 
-A **1.7B dense post-trained model** that, by end of project, satisfies **all** of:
+Ship **Tem-Rust-1.7B**, a 1.7B Rust coding specialist. By end of project:
 
-1. **Primary — Beat Qwen2.5-Coder-3B-Instruct on SWE-bench Lite** at 1.7B params. The "1.7B beats 3B" surprise moment.
-2. **SWE-bench Verified ≥ 20%** — credible for the size class (no public 1B-2B model has cleared this without distillation tricks).
-3. **Private holdout (30–50 post-cutoff GitHub issues) ≥ 25%** — proves we generalise beyond contamination.
-4. **Inference: ≥ 20 tok/s on M3 Pro at int4** — runnable on the user's actual laptop.
-5. **Position: top open coding agent at ≤ 2B params** on at least one public leaderboard at release.
+1. **TemRust-Issue ≥ 35%** (real GitHub Rust issues, post-cutoff, manually curated, `cargo test` verifier)
+2. **TemRust-Borrow ≥ 60%** + **TemRust-Type ≥ 60%** + **TemRust-Clippy ≥ 50%** + **TemRust-Test ≥ 50%**
+3. **Run at ≥ 30 tok/s on M3 Pro at int4** (Q4_K_M GGUF)
+4. **Cleanly outperforms Qwen2.5-Coder-1.5B-Instruct** on TemRust-* by ≥ 10 pts on every sub-eval
+5. **Within 5 pts of Qwen2.5-Coder-7B-Instruct** on at least 3 of 5 sub-evals (the "1.7B fights 7B" surprise)
 
-**Stretch (if budget allows after primary hit):**
-- Within 5 points of Qwen3-Coder-Next (3B-active MoE) on SWE-bench Verified
-- 0.6B distillation that retains ≥ 70% of 1.7B score (mobile / iPhone class)
+**Shipped artifacts:**
+- HuggingFace: `tem-llm/tem-rust-1.7b` (Apache-2.0 weights + GGUF quants)
+- crates.io: `tem-rust` CLI (`cargo install tem-rust`)
+- GitHub: project repo with model card, training recipe, eval harness
+- Landing: `tem-rust.dev` or GitHub Pages with 30s demo gif
+- r/rust launch post + technical blog post
 
-**Out of scope:** general chat, world knowledge, vision, voice, multilingual writing. We do **one thing**: resolve real GitHub issues at 1.7B.
+**Out of scope:** general chat, non-Rust languages, vision, voice, training data > 10K examples, multi-language eval.
 
 ---
 
@@ -26,186 +29,159 @@ A **1.7B dense post-trained model** that, by end of project, satisfies **all** o
 
 | Constraint | Value |
 |---|---|
-| Param size (primary) | 1.7B dense (Qwen3-1.7B-Base) |
-| Param size (stretch) | 0.6B (Qwen3-0.6B-Base) |
+| Param size | 1.7B dense (Qwen3-1.7B-Base) |
 | Compute budget | **$500 hard cap** |
-| Calendar time | ~3 months solo |
-| Headcount | 1 (solo dev: Quan) |
-| Base model | Qwen3-1.7B-Base (primary), Qwen2.5-Coder-1.5B-Base (fallback) |
-| Teacher | DeepSeek-R1-Distill-Qwen-32B (free open) primary; DeepSeek-V3.1 API only if cheap; **no Claude/GPT-5** (ToS + cost) |
-| License (output) | Apache-2.0 weights + recipe (assume permissive unless dataset licences forbid) |
+| Headcount | 1 (Quan, hands-off) + Claude Code as autonomous executor |
+| Calendar time | ~10 weeks |
+| License | Apache-2.0 (weights + recipe + CLI) |
+| Teacher | Qwen3-Coder-Next (open, MoE 3B-active, primary) OR DSR1-Distill-Qwen-14B (open, MIT, fallback) |
+| GPU vendor | Lambda Labs spot A100 80GB ($1.49/hr) |
 
 ---
 
-## §2. Recipe (5 phases)
+## §2. Architecture
 
-### Phase 0 — Foundations (FREE, 1–2 weeks)
+| Component | Choice |
+|---|---|
+| Base | Qwen3-1.7B-Base (Apache-2.0) — fallback Qwen2.5-Coder-1.5B-Base |
+| Adapter | QLoRA: 4-bit NF4 base + rank-16 / α-32 / dropout-0.05 LoRA |
+| Targets | q/k/v/o + gate/up/down (full attention + MLP) |
+| Optimizer | AdamW 8-bit |
+| LR / schedule | 2e-4 / cosine, warmup 0.03 |
+| Sequence length | 8K |
+| Batch | per-device 1, grad-accum 32 (eff = 32) |
+| Precision | bf16 |
+| Output quant | int4 NF4 GGUF (Q4_K_M); also Q5_K_M and Q2_K |
+| Inference (Mac) | llama.cpp / Ollama |
+| Training framework | Unsloth (single-GPU king); Axolotl YAML for orchestration |
+| RL framework (Phase 4) | Unsloth GRPO; TRL fallback |
 
-Eval-first. No training until baselines and private holdout exist.
+---
 
-**Local Mac (M-series):**
-- Install Unsloth (`pip install unsloth`), Axolotl backup, TRL, vllm
-- Wire up SWE-bench Verified runner + SWE-bench Lite + private holdout runner
-- Run baselines on rented cheap GPU OR free Kaggle/Colab T4:
-  - Qwen3-1.7B-Base
-  - Qwen3-1.7B-Instruct
-  - Qwen2.5-Coder-1.5B-Instruct
-  - DeepSeek-R1-Distill-Qwen-1.5B
-  - Qwen2.5-Coder-3B-Instruct (the target to beat)
+## §3. Data Strategy
 
-**Private holdout: build manually.**
-- 30–50 fresh GitHub issues, opened **after** Qwen3 base cutoff (~Jan 2026)
-- Active repos with passing CI
-- Languages: Python (primary), TypeScript, Rust, Go (each 5–10)
-- Each annotated with: issue text, repo state, expected behaviour, test command
+Five sources, all `cargo`-verifiable.
 
-**Exit criterion:** every benchmark runs reproducibly on at least one baseline. Private holdout exists. Choice of base model is locked.
-
-**Cost: $0.** All free or trivial.
-
-### Phase 1 — QLoRA SFT v0 (Weeks 3–5)
-
-**Goal:** beat Qwen2.5-Coder-1.5B-Instruct on SWE-bench Lite using only public data.
-
-Datasets:
-| Source | Items | Role |
+| Source | Target | Verifier |
 |---|---|---|
-| **R2E-Gym** | 8.1K problems | Primary agent traces |
-| AceCoder / AceCode-89K | 89K | SFT density |
-| OpenHands trajectories | mixed | Tool-use diversity |
-| **Reasoning supplement (10–20%)** | ~1K from MetaMathQA + OpenMathInstruct-2 + algorithms | The canon-thesis ablation |
-| Tulu-3 (filtered for tool use) | ~1K | Format diversity |
+| Real GitHub Rust issues (issue → fix-PR with added test) | 3,000 | `cargo test` |
+| Synthetic compiler-error fixes | 2,000 | `cargo check` |
+| Test generation pairs from well-tested crates | 1,500 | `cargo test` |
+| Clippy idiomatic refactors | 1,000 | `cargo clippy -- -D warnings` |
+| Phase-2 self-distillation on post-cutoff issues | 2,000 | `cargo test` |
+| **Total target** | **~9,500** | |
+
+After dedup + decontamination against eval suite: **~7-8K usable**.
 
 Pipeline:
-1. Pull, normalise to chat-format with tool calls
-2. **Aggressive curation: filter to 500–5,000 highest-quality examples**. 2026 wisdom: 500 clean > 5,000 noisy.
-3. **Decontamination: n-gram + embedding match against every eval set; drop overlap.**
-4. SFT with Unsloth QLoRA on Qwen3-1.7B-Base
-   - rank=16, alpha=32, dropout=0.05
-   - LR 2e-4, cosine, 3 epochs, batch 4 grad-accum 8
-   - Single A100 (Lambda spot ~$1.50/hr) for 12–24 hours
-5. **Run two checkpoints**: with reasoning supplement vs without. **This is the ablation.**
-
-**Exit criterion:** beat Qwen2.5-Coder-1.5B-Instruct on SWE-bench Lite by ≥ 3 pts AND show direction on private holdout.
-
-**Cost: $20–50.**
-
-### Phase 2 — Synthetic Distillation (Weeks 6–8)
-
-**Goal:** add post-cutoff issue trajectories the open SFT corpus doesn't have.
-
-Pipeline:
-1. Curate ~500 real GitHub issues from post-base-cutoff dates in active repos (Python/TS/Rust/Go) with passing existing tests
-2. Wrap each in an R2E-Gym-style executable env (use SWE-Playground recipe)
-3. Run agent loop with **DeepSeek-R1-Distill-Qwen-32B** (open, free, run locally via Ollama or rented A100 inference) as teacher
-4. Keep ONLY trajectories whose final patch passes all originally-passing tests AND breaks no other tests
-5. Aim for 2,000–5,000 verified trajectories (cost gate)
-6. SFT round 2 with QLoRA on union of (Phase 1 best mix + new synthetic)
-
-**Why DeepSeek-R1-Distill-32B as teacher:** open weights, free if self-hosted, strong code+reasoning, no ToS risk. Inference cost = GPU rental, ~$1.50/hr × runtime.
-
-**Exit criterion:** ≥ +5 points on SWE-bench Lite vs Phase 1 best.
-
-**Cost: $100–200.** (Most goes to teacher inference + SFT compute.)
-
-### Phase 3 — GRPO Mini-RL (Weeks 9–11)
-
-**Goal:** push from "good imitation" to "actually solves problems" via verifiable reward.
-
-Setup:
-- Environment: **R2E-Gym 200–500 problems** (small slice — full 4,500 is out of budget)
-- Algorithm: **GRPO with Unsloth** (works on free T4 / 16GB VRAM)
-- Reward shaping:
-  - Primary: all repo tests pass (sparse, ±1)
-  - Shaping: code parses (+0.05), runs (+0.05), no regressions (+0.1), patch ≤ 200 LOC (penalty if over)
-- Curriculum: easy → hard, ordered by Phase 2 teacher difficulty rating
-- **Hard cap: $200 of compute. If not converging at 30% pass-rate by midpoint, stop and ship Phase 2 model.**
-
-Exit criterion: SWE-bench Lite score ≥ Qwen2.5-Coder-3B-Instruct (the primary win condition).
-
-**Cost: $100–200.**
-
-### Phase 4 — Inference Scaling, Quantization, Ship (Weeks 12–14)
-
-- Implement **R2E-Gym hybrid verifier** at inference: execution-based + execution-free, weighted, n=4 rollouts → best-of-n. Buys 5–10 points free.
-- **int4 quantization** via llama.cpp / Unsloth / GGUF; verify ≥ 20 tok/s on M3 Pro
-- Final eval pass: SWE-bench Verified, Lite, Live (sample), τ-bench, **private holdout**
-- Decide:
-  - Win condition met → public release: HuggingFace weights + Apache-2.0 + technical report + recipe gist
-  - Not met → ship the technical report regardless. Negative results count.
-- **Stretch: distill 1.7B → 0.6B** if any budget remaining.
-
-**Cost: $0–50.**
+1. Local crawler pulls from top ~500 Rust repos (stars > 100, has tests, recently active)
+2. Issue-PR matcher finds: failing-test-before, fix-PR, passing-test-after
+3. For each match: extract `(issue_text, repo_state, diff, test_cmd)`
+4. For corruption-style synthetic: programmatically introduce errors, ask teacher to fix, verify
+5. For test-gen: extract `(fn_signature + body, #[test] block)` from existing crates
+6. For clippy: run clippy on un-cleaned code, ask teacher to apply suggestion, verify
+7. Decontaminate: every example checked against TemRust-* eval suite via exact + embedding match
 
 ---
 
-## §3. Edges — Why This Could Actually Surprise
+## §4. Eval Suite (we own this)
 
-We will not outspend Alibaba. Our edges:
-
-1. **Narrowness on a fresh size class.** Almost nobody has put serious post-training compute on 1.7B coding agents. The space is empty.
-2. **The reasoning supplement ablation.** Most agent-coding fine-tunes are pure-coding. We mix 10–20% formal reasoning. If it transfers, that's a publishable result; if it doesn't, that itself is informative.
-3. **Post-cutoff data.** Phase 2 synthetic uses issues none of the bases have seen.
-4. **Hybrid-verifier inference.** Not all teams ship this; we make it standard.
-5. **2026-vintage open teachers.** DeepSeek-R1-Distill-32B distilled into a 1.7B is a recipe that fits on consumer rentals.
-
-What is **not** an edge: novel architecture, novel optimizer, novel scaling law, raw compute.
-
----
-
-## §4. Tooling Stack (every step)
-
-| Layer | Choice | Why |
+| Sub-eval | Tasks | Verifier |
 |---|---|---|
-| Base | Qwen3-1.7B-Base / Qwen2.5-Coder-1.5B-Base | Open, strong, Apache-2.0 |
-| SFT framework | **Unsloth** | 2-5× faster, 80% less VRAM, free Colab/Kaggle support |
-| QLoRA | Unsloth-native | rank=16, α=32 default |
-| RL framework | **Unsloth GRPO** | Works on T4 16GB; fallback to TRL GRPO |
-| Pipeline orchestration | **Axolotl** | YAML configs; Unsloth integration |
-| Inference | **vllm** for batch eval; **llama.cpp/GGUF** for Mac | Standard |
-| Quantization | llama.cpp int4/int2 GGUF | M-series Mac native |
-| Eval | SWE-bench official harness | Standard |
-| Tracking | Weights & Biases (free tier) | Standard |
-| Compute | Lambda Labs spot A100 ($1.50/hr) + free Kaggle T4 | Cheapest reliable |
-| Storage | Local NVMe + Cloudflare R2 (free tier) | Cheap egress |
+| TemRust-Borrow | 50 | `cargo check` |
+| TemRust-Type | 50 | `cargo check` |
+| TemRust-Test | 50 | `cargo test` |
+| TemRust-Clippy | 50 | `cargo clippy -- -D warnings` |
+| TemRust-Issue | 50 (real, post-cutoff) | repo-specific tests |
+| **Total** | **250** | |
+
+Hand-curated. Held back from training. Released publicly alongside the model. Becomes the de-facto Rust-LLM benchmark.
 
 ---
 
-## §5. Datasets
+## §5. Pipeline — 6 Phases
 
-**Training (Phase 1–2):**
-- R2E-Gym (https://github.com/R2E-Gym/R2E-Gym)
-- AceCoder / AceCode-89K
-- OpenHands trajectories
-- MetaMathQA + OpenMathInstruct-2 (reasoning supplement)
-- Tulu-3-SFT-Mixture (filtered)
-- Phase 2 synthetic: ~2-5K verified trajectories (DSR1-Distill-32B teacher)
+### Phase 0 — Foundations (Week 1–2, $20)
+- Provision Lambda Labs (user one-time setup)
+- Build local Mac dev environment: Unsloth, Axolotl, llama.cpp, vllm
+- Build eval harness: `cargo`-verifier wrappers, scoring script, results dashboard
+- Run baselines on TemRust-Issue + TemRust-Borrow:
+  - Qwen3-1.7B-Base, Qwen3-1.7B-Instruct
+  - Qwen2.5-Coder-1.5B-Base, -1.5B-Instruct
+  - Qwen2.5-Coder-3B-Instruct
+  - Qwen2.5-Coder-7B-Instruct
+  - DSR1-Distill-Qwen-1.5B
+- Lock primary base model based on baselines
+- Eval dashboard live at end of phase
 
-**Eval (decontaminated against training):**
-- SWE-bench Verified (sampled 100 issues if full 500 is too expensive)
-- SWE-bench Lite (300 issues, primary)
-- SWE-bench-Live (rolling sample)
-- τ-bench (tool use)
-- **Private holdout (30–50 post-cutoff issues) — release-gate metric**
+**Exit criterion:** all 250 eval tasks runnable; baseline scores recorded; primary base locked.
+
+### Phase 1 — Data Collection (Week 2–4, $0)
+- Crawl GitHub via API (free tier sufficient)
+- Build issue-PR matcher
+- Generate sources 1, 3, 4 (real issues, test pairs, clippy fixes)
+- Defer source 2 (synthetic compiler errors) until Phase 3 since it needs teacher
+- Decontamination pass against full eval suite
+- Output: `data/sft_v0.jsonl` with ~5,500 examples
+
+**Exit criterion:** ≥ 5K verified examples; decontamination report shows zero overlap with eval.
+
+### Phase 2 — SFT v0 (Week 4–5, $30)
+- Hyperparameter sweep: 3 runs varying LR, rank, mix
+- Train Qwen3-1.7B-Base on `sft_v0.jsonl` with Unsloth QLoRA
+- Eval after each run on TemRust-* suite
+- Pick best checkpoint as `tem-rust-v0`
+- Smoke test: int4 quant + run on M3 Pro
+
+**Exit criterion:** v0 beats Qwen2.5-Coder-1.5B-Instruct on TemRust-Borrow + TemRust-Type by ≥ 5 pts.
+
+### Phase 3 — Synthetic + SFT v1 (Week 5–7, $45)
+- Provision teacher (Qwen3-Coder-Next or DSR1-Distill-Qwen-14B) on rented A100
+- Generate Source 2 (synthetic compiler errors): ~2K examples
+- Generate Source 5 (self-distillation on post-cutoff issues): ~2K examples
+- Verify all via `cargo check` / `cargo test`
+- Build `data/sft_v1.jsonl` = sft_v0 + new synthetic
+- Train v1 with same setup
+- Eval
+
+**Exit criterion:** v1 beats v0 by ≥ 5 pts on TemRust-Issue.
+
+### Phase 4 — GRPO Mini-RL (Week 7–9, $50, OPTIONAL)
+- Use 200 R2E-Gym-style Rust tasks (built from Phase 1 data)
+- Unsloth GRPO with `cargo test` reward (binary +1/0)
+- Curriculum: easy → hard
+- Hard cap: 24 hrs ($36) on A100 + $5 eval = $41 worst case (under $50 ceiling)
+- **If v1 already meets §0 win condition, SKIP this phase** and save the budget
+
+**Exit criterion:** v2 (RL'd) beats v1 by ≥ 3 pts on TemRust-Issue, OR phase skipped if v1 met bar.
+
+### Phase 5 — Quantize, Package, Ship (Week 9–10, $10)
+- Quantize best checkpoint to GGUF: Q4_K_M (default), Q5_K_M (high), Q2_K (mobile)
+- Verify ≥ 30 tok/s on M3 Pro at Q4_K_M
+- Build CLI tool `tem-rust` in Rust:
+  - `tem-rust fix <file>` — fix compile errors
+  - `tem-rust test <file::fn>` — generate test
+  - `tem-rust review <diff>` — clippy-style review
+  - `tem-rust chat` — interactive REPL
+- Wraps llama.cpp via `llama-cpp-2` Rust bindings
+- Build landing page (GitHub Pages or `tem-rust.dev`)
+- Record 30s demo gif
+- Write technical blog post + r/rust launch post
+- Push: HuggingFace weights + GGUF, crates.io CLI, GitHub repo public
+
+**Exit criterion:** all artifacts public; CLI installable via `cargo install tem-rust`.
 
 ---
 
-## §6. Budget Discipline
+## §6. Automation Model
 
-| Phase | Floor | Ceiling | Hard cap rule |
-|---|---|---|---|
-| 0 | $0 | $0 | Free only |
-| 1 | $20 | $50 | Stop if no improvement vs base after 2 runs |
-| 2 | $100 | $200 | Stop if synthetic data quality < 50% test-pass rate |
-| 3 | $100 | $200 | Stop if not at 30% pass-rate by midpoint |
-| 4 | $0 | $50 | One final eval run only |
-| **Total** | **$220** | **$500** | One re-run's worth of margin |
+Claude Code is the executor. See `AUTOMATION.md` for the protocol.
 
-**Spend rules:**
-- Use **Lambda Labs spot A100** ($1.50/hr) as default rental
-- Use **Kaggle / Colab T4** for free runs (smoke tests, eval, GRPO ablations)
-- Never run >24 hrs without checking partial results
-- Track every USD in `BUDGET_LOG.md` (to be created Phase 0)
+**One-time setup (user, ≤ 30 min):** Lambda API key, HF write token, GitHub PAT, $500 budget authorisation.
+
+**Per-week (user, ≤ 15 min):** open new session, say "continue Tem-Rust", review milestone if at phase boundary, approve any single transaction > $50.
+
+**Continuous (Claude Code):** everything else — provisioning, training, eval, packaging, distribution.
 
 ---
 
@@ -213,13 +189,16 @@ What is **not** an edge: novel architecture, novel optimizer, novel scaling law,
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| 1.7B too small for tool-use reliability | High | Critical | Phase 0 baseline tells us early; if base fails 5% on Lite, drop to specialised TDD-only task or move to 3B |
-| Eval contamination inflates scores | Very High | High | Private holdout is release-gate |
-| GRPO doesn't converge at 1.7B | Med-High | Med | Fallback: ship Phase 2 model, drop GRPO |
-| Synthetic data quality bad | Med | Med | Phase 2 quality gate: ≥ 50% trajectories pass tests, else re-tune teacher prompt |
-| Single-builder data bug | High | Med | Daily distribution sanity-checks; commit datasets to git LFS |
-| Frontier ships matching 1B coder before us | Low-Med | Med | Time-box 3 months; release SFT-only by Week 8 if needed |
-| Budget overrun | Very High | High | Hard per-phase caps; weekly burn review |
+| Qwen3-1.7B-Base not released as bare base (only -Instruct or -Thinking) | Med | Med | Fallback to Qwen2.5-Coder-1.5B-Base verified Phase 0 |
+| Data corpus < 5K after filter | Med | High | Backstop: synthetic-only training; widen Source 2-4 targets |
+| Teacher quality insufficient for synthetic data | Med | Med | Try multiple teachers; quality gate ≥ 50% test-pass before bulk run |
+| GRPO unstable at 1.7B | Med | Low | Skip Phase 4 if v1 hits bar; ship v1 |
+| 1.7B too small for tool-use chains | Med | High | Phase 0 baselines tell us early; if base fails 5% on Issue, escalate to 3B |
+| Cloud GPU price changes | Low | Low | Use vast.ai or RunPod fallback; rebudget if >2x change |
+| Claude Code session limits break long runs | High | Low | Cloud jobs run unattended; we poll, not stream |
+| User loses Lambda API credentials | Low | Med | Document recovery in AUTOMATION.md |
+| Budget overrun | Med | High | Per-phase hard caps; >$50 single transaction needs auth |
+| No-one cares about a small Rust model | Med | Med | Mitigate via demo quality + r/rust post + integration with TEMM1E |
 
 ---
 
@@ -227,24 +206,19 @@ What is **not** an edge: novel architecture, novel optimizer, novel scaling law,
 
 | Date | Decision | Why |
 |---|---|---|
-| 2026-05-05 | Pivot from "general intelligence per param" to "agentic coding per param" | Strict canon thesis is benchmark-fit not utility |
-| 2026-05-05 | Drop 7B/$25–65K plan; lock 1.7B/$500/solo | Solo dev with $500 max; surprise-the-market angle stronger at 1.7B |
-| 2026-05-05 | Qwen3-1.7B-Base as primary (Qwen2.5-Coder-1.5B-Base fallback) | Strongest 1B-class base in 2026 |
-| 2026-05-05 | Unsloth as SFT/RL framework | Single-GPU king; free Colab/Kaggle support; 80% VRAM reduction |
-| 2026-05-05 | Open teachers only (DSR1-Distill-32B primary) | ToS + cost; can self-host |
-| 2026-05-05 | Reasoning supplement (10–20%) is the originality lever, ablated | Salvages canon thesis as testable component |
-| 2026-05-05 | Recalibrated win condition: beat Qwen2.5-Coder-3B-Instruct on SWE-bench Lite | Honest at 1.7B; "1.7B beats 3B" is the surprise |
-
-Future decisions appended here, dated.
+| 2026-05-05 | Pivot 1: general → agentic coding | Strict canon thesis is benchmark-fit |
+| 2026-05-05 | Pivot 2: 7B → 1.7B / $500 / solo | Owner's hard constraint |
+| 2026-05-05 | Pivot 3: research → product | Owner wants something people use, not A/B |
+| 2026-05-05 | Pivot 4: generic → Rust specialist | Niche uncontested; cargo = perfect verifier; aligns with TEMM1E |
+| 2026-05-05 | Distribution: HF + crates.io + r/rust | Rust-native distribution channels |
+| 2026-05-05 | Eval: build TemRust-* (250 tasks, cargo-verified) | Own the benchmark = own the moat |
 
 ---
 
-## §9. Next Action (this week)
+## §9. Next Action
 
-1. Confirm win condition and constraints (user signs off / pushes back)
-2. Install Unsloth on local Mac; verify it runs
-3. Build private holdout: 30 fresh post-cutoff issues from active repos with green CI
-4. Run baselines: Qwen3-1.7B-Base, Qwen3-1.7B-Instruct, Qwen2.5-Coder-1.5B-Instruct, Qwen2.5-Coder-3B-Instruct, DSR1-Distill-1.5B
-5. Pick base model based on baseline + licence
+1. User authorises $500 budget + provides Lambda + HF + GitHub credentials
+2. I provision cloud, run Phase 0 baselines, build eval harness
+3. Phase 0 milestone report at end of Week 2 → user reviews → Phase 1 starts
 
-After this is done, Phase 1 starts.
+**Status: awaiting user go-ahead.**

@@ -1,39 +1,69 @@
-# TemLLM
+# Tem-Rust-1.7B
 
-**Goal:** ship the **best open ≤2B coding agent**, on a **$500 solo budget**.
+A 1.7B parameter Rust coding specialist. Fine-tuned from Qwen3-1.7B-Base on `cargo`-verified Rust trajectories. Runs offline at int4 on M-series Macs. Free, private, fast.
 
-Concretely: a **1.7B dense** post-trained model (Qwen3-1.7B-Base) that **beats Qwen2.5-Coder-3B-Instruct on SWE-bench Lite**, generalises on a **private post-cutoff GitHub-issue holdout**, and runs at **≥20 tok/s on M3 Pro at int4**. Stretch: 0.6B distillation; within 5 pts of Qwen3-Coder-Next on SWE-bench Verified.
+**Status: pre-Phase-0. Awaiting build authorisation.** See `STATUS.md`.
 
-The project went through two pivots on 2026-05-05:
-1. **Pivot 1:** "general intelligence per param" → "agentic coding per param" (the original canon thesis is benchmark-fit, not utility — see `CHALLENGE.md`)
-2. **Pivot 2:** 7B/$25–65K → **1.7B/$500/solo** (constraints from owner; the surprise-the-market angle is stronger at 1.7B than 7B)
+---
 
-**The original canon thesis survives as a 10–20% reasoning-data supplement in the SFT mix, ablated against pure-coding training.** That ablation is the testable novelty lever (see `PLAN.md` §3 and `OPEN_QUESTIONS.md` Q3).
+## What it does
+
+- `tem-rust fix <file>` — fix rustc compile errors and borrow-checker issues
+- `tem-rust test <file::fn>` — generate `#[test]` blocks
+- `tem-rust review <diff>` — clippy-style code review
+- `tem-rust explain <error>` — explain rustc error messages
+- `tem-rust chat` — interactive REPL
+
+Runs at ≥ 30 tok/s on M3 Pro at int4 (Q4_K_M GGUF, ~1 GB).
+
+---
+
+## Why it exists
+
+Frontier LLMs (Claude, GPT) are notably weaker on Rust than on Python. They get borrow-checker fixes wrong, hallucinate trait bounds, and produce non-idiomatic code. **There is no top open small Rust coding specialist.** Tem-Rust fills the niche.
+
+The project is built on a $500 budget by a solo dev with Claude Code as autonomous executor. Total user time across the 10-week build: ≤ 90 minutes.
+
+---
+
+## How it's built
+
+1. **Base** — Qwen3-1.7B-Base (Apache-2.0)
+2. **Data** — 7-8K `cargo`-verified Rust trajectories (real GitHub issues + synthetic compile errors + test pairs + clippy fixes + self-distillation)
+3. **Train** — QLoRA SFT via Unsloth → optional GRPO with `cargo test` reward
+4. **Quantize** — int4 GGUF (Q4_K_M) for M-series Macs
+5. **Ship** — HuggingFace weights + `cargo install tem-rust` CLI + 30s demo + r/rust launch
+
+Full plan in [`PLAN.md`](./PLAN.md). Technical pipeline in [`PIPELINE.md`](./PIPELINE.md). Exact cost math in [`COSTS.md`](./COSTS.md). Autonomous execution model in [`AUTOMATION.md`](./AUTOMATION.md).
 
 ---
 
 ## Read in this order
 
-1. **[PLAN.md](./PLAN.md)** ← the locked project plan ($500/1.7B/solo). Start here.
-2. **[PIPELINE.md](./PIPELINE.md)** — the 2026 SOTA toolchain (Unsloth + QLoRA + GRPO + hybrid verifier). Cite-able recipe.
-3. **[OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md)** — Q1–Q8 answered, Q9–Q10 still need decisions.
-4. **[THEORY.md](./THEORY.md)** — the original thesis, captured verbatim.
-5. **[CHALLENGE.md](./CHALLENGE.md)** — why the strict thesis was wrong, with citations.
-6. **[PRIOR_ART.md](./PRIOR_ART.md)** — the small-curated-LLM landscape. Context, not directly applicable.
-7. **[FEASIBILITY.md](./FEASIBILITY.md)** — generic small-model feasibility (superseded by `PLAN.md`).
-
-When two docs disagree, `PLAN.md` wins.
+1. **[PLAN.md](./PLAN.md)** ← the build plan
+2. **[PIPELINE.md](./PIPELINE.md)** — technical execution
+3. **[COSTS.md](./COSTS.md)** — exact cost math, $500 hard cap
+4. **[AUTOMATION.md](./AUTOMATION.md)** — how Claude Code drives this autonomously
+5. **[STATUS.md](./STATUS.md)** — current state, updated weekly
+6. **[BUDGET_LOG.md](./BUDGET_LOG.md)** — live spend ledger
+7. **[OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md)** — almost all closed
+8. **[THEORY.md](./THEORY.md)** — original "high-IQ canon" thesis (history)
+9. **[CHALLENGE.md](./CHALLENGE.md)** — why the strict thesis was wrong (history)
+10. **[PRIOR_ART.md](./PRIOR_ART.md)** — small-curated-LLM landscape (context)
+11. **[FEASIBILITY.md](./FEASIBILITY.md)** — generic small-model feasibility (superseded)
 
 ---
 
-## Status
+## Win condition (one-line)
 
-- Phase: **Phase 0 — Foundations** (eval harness, baselines, build private holdout)
-- Owner: Quan Duong (mini.illidan@gmail.com), solo
-- Created: 2026-05-05
-- Pivoted twice on 2026-05-05 (general → agentic-coding → $500/1.7B)
-- No training code yet; eval first, baselines next.
+> A 1.7B Rust coding agent that beats Qwen2.5-Coder-1.5B-Instruct by ≥ 10 pts on every TemRust-* sub-eval and is within 5 pts of Qwen2.5-Coder-7B-Instruct on most — public on HuggingFace, installable via `cargo install tem-rust`, runnable offline on a laptop.
 
-## Win condition (one-line summary)
+---
 
-> A 1.7B open coding agent that beats Qwen2.5-Coder-3B-Instruct on SWE-bench Lite, generalises on a private post-cutoff holdout, runs on consumer hardware at int4 — fully reproducible at <$500 by a solo dev. Open weights, open recipe.
+## Status & Owner
+
+- **Owner:** Quan Duong (mini.illidan@gmail.com), hands-off
+- **Executor:** Claude Code (autonomous)
+- **Created:** 2026-05-05
+- **Direction locked:** 2026-05-05 (after four pivots — see `PLAN.md` §8)
+- **Phase:** Pre-Phase-0 — awaiting user authorisation
