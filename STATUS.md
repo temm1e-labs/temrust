@@ -67,13 +67,44 @@ See `PLAN.md` for full plan.
 - Final landing page domain (default: GitHub Pages)
 - TEMM1E integration: separate model or same? (decision deferred to Phase 5)
 
-## Next action (immediate)
+## Phase 0 progress (2026-05-05 evening — milestone: harness validated)
 
-1. Build TemRust-Issue eval task harness — schema, runner, scorer
-2. Curate first 5 TemRust-Issue tasks manually (smoke-test the format)
-3. Run baseline: Qwen3-1.7B-Instruct via Together AI free tier on those 5 tasks (cost: $0)
-4. If end-to-end passes: scale up to 50 tasks per sub-eval, 5 sub-evals
-5. Then run baselines on all 9 candidate models
+| Item | Status | Notes |
+|---|---|---|
+| Eval schema + runner + verifier + extractor | ✅ | Working end-to-end |
+| Hand-curated tasks | 🟡 7/200 (3 borrow, 2 type, 2 test) | Need 50 per sub-eval |
+| Together-live baselines | ✅ 2 models (Qwen3-Coder-Next-FP8 71.4%, DeepSeek-V3.1 71.4%) | Both teachers competent on our task format |
+| Non-serverless baselines (Qwen3-1.7B-Base, etc.) | ⏸ | Need local Mac inference (Ollama) — next session |
+| Strand-Rust-Coder-14B baseline | ⏸ | Will run via local Ollama on Mac (M-series handles 14B at int4) |
+| GitHub crawler (Phase 1 prep) | ⏸ | Scaffold next |
+| RunPod training launcher | ⏸ | Scaffold next |
+
+## Baseline scores (TemRust-* sub-eval, n=7 tasks total)
+
+| Model | Borrow (3) | Type (2) | Test (2) | Total |
+|---|---|---|---|---|
+| Qwen3-Coder-Next-FP8 (teacher) | 3/3 | 2/2 | 0/2 | 5/7 (71.4%) |
+| DeepSeek-V3.1 | 2/3 | 2/2 | 1/2 | 5/7 (71.4%) |
+
+**Insight:** test-generation is hardest sub-eval (matches Strand paper finding "largest improvements in test generation"). Both top models fail there, leaves clear room for our specialist.
+
+## Next action (next session)
+
+1. **Set up local Mac inference for non-serverless bases.** Install Ollama: `brew install ollama && ollama serve`. Pull `qwen2.5-coder:1.5b`, `qwen3:1.7b`, `qwen3:0.6b`, `deepseek-r1:1.5b`. Add `eval/clients.py:OllamaClient`. Run baselines.
+
+2. **Pull Strand-Rust-Coder-14B GGUF** from HF and run baseline locally via Ollama (will be slow on Mac but free).
+
+3. **Curate more eval tasks.** Target ~10 per sub-eval (40 total) for richer baselines. Source ideas: Rust by Example, rustc UI tests, real GitHub issues.
+
+4. **Begin Phase 1 GitHub crawler.** scripts/crawl_rust_issues.py — find merged PRs in popular Rust repos that close issues + add tests. Save metadata to data/raw/issues.jsonl.
+
+5. **Begin RunPod launcher.** scripts/launch_train.py — provisions RTX 4090 spot, runs training via cloud-init script, auto-shuts. Smoke-test with 1-min trivial workload (~$0.005).
+
+## Spent so far
+**$0.02 / $75.00 funded** (≈0.03% of budget)
+- API verification: $0
+- Smoke test: $0.005
+- Baselines on 2 models × 7 tasks: ~$0.015
 
 ## Next action when "Continue Tem-Rust" is invoked
 

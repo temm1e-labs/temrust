@@ -7,6 +7,8 @@ Hard cap: **$75** (actual funding: $50 RunPod + $25 Together AI). Every cloud-GP
 | 2026-05-05 | pre-0 | Project planning, no compute | 0 | $0.00 | $0.00 | **$0.00** |
 | 2026-05-05 | 0 | API verification (curl + Python check scripts; free tier) | 0 | $0.00 | $0.00 | **$0.00** |
 | 2026-05-05 | 0 | Eval harness smoke test: Qwen3-Coder-Next-FP8 on 3 hand-curated tasks (3/3 pass) | ~6K tok | $0.85/Mtok blended | $0.005 | **$0.005** |
+| 2026-05-05 | 0 | Baseline run: Qwen3-Coder-Next-FP8 on 7 tasks (5/7) | ~12K tok | $0.85/Mtok blended | $0.010 | **$0.015** |
+| 2026-05-05 | 0 | Baseline run: DeepSeek-V3.1 on 7 tasks (5/7) | ~14K tok | $1.15/Mtok blended | $0.016 | **$0.031** |
 
 ## Authorisations
 

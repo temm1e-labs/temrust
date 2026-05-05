@@ -1,0 +1,11 @@
+{
+  "id": "borrow_003",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow-checker error. The function should append the prefix to each item and return the resulting Vec. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn prefix_all(prefix: String, items: Vec<String>) -> Vec<String> {\n    let mut out = Vec::new();\n    for item in items {\n        let combined = prefix + &item;\n        out.push(combined);\n    }\n    out\n}\n\nfn main() {\n    let v = vec![String::from(\"alice\"), String::from(\"bob\")];\n    for s in prefix_all(String::from(\"hi \"), v) {\n        println!(\"{}\", s);\n    }\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "`prefix + &item` consumes prefix on first iteration, can't be reused. Idiomatic fix: take `&str` for prefix, use `format!` or `prefix.to_owned() + &item`."
+}

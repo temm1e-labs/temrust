@@ -1,0 +1,11 @@
+{
+  "id": "test_002",
+  "sub_eval": "test",
+  "task_prompt": "Add a `#[test]` block that thoroughly tests `count_vowels`. Include cases for: empty string, all vowels, no vowels, mixed letters, uppercase letters (the implementation handles both cases via `to_ascii_lowercase`). Return the complete program (existing code + new tests) in a single ```rust code block.",
+  "input_code": "pub fn count_vowels(s: &str) -> usize {\n    s.chars()\n        .filter(|c| matches!(c.to_ascii_lowercase(), 'a' | 'e' | 'i' | 'o' | 'u'))\n        .count()\n}\n\nfn main() {\n    println!(\"{}\", count_vowels(\"Hello World\"));\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Implementation is case-insensitive; tests should reflect that."
+}

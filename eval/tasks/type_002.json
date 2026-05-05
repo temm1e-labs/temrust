@@ -1,0 +1,11 @@
+{
+  "id": "type_002",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type error in this Rust code. The fixed program should print the doubled string. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn double(s: String) -> String {\n    s + s\n}\n\nfn main() {\n    let greeting = String::from(\"hello \");\n    println!(\"{}\", double(greeting));\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "`s + s` requires the right operand to be `&str`, not another owned `String`. Fix: `s.clone() + &s` or use `format!`."
+}
