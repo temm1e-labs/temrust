@@ -1,0 +1,11 @@
+{
+  "id": "borrow_007",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow-checker error. The function counts how many words in the input have more vowels than consonants. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn vowel_heavy_count(text: String) -> usize {\n    let words: Vec<&str> = text.split_whitespace().collect();\n    let total = words.len();\n    let mut count = 0;\n    for w in words {\n        let v = w.chars().filter(|c| matches!(c, 'a'|'e'|'i'|'o'|'u')).count();\n        let c = w.len() - v;\n        if v > c {\n            count += 1;\n        }\n    }\n    println!(\"checked {} words\", total);\n    count\n}\n\nfn main() {\n    let s = String::from(\"hello rust beautiful world\");\n    println!(\"{}\", vowel_heavy_count(s));\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "`words` borrows from `text`, but `text` is moved by `.split_whitespace().collect()` to produce `words`. Ownership transfer issue. Fix: take &str."
+}

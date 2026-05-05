@@ -1,0 +1,15 @@
+{
+  "id": "issue_004",
+  "sub_eval": "issue",
+  "task_prompt": "There's an off-by-one bug in `binary_search` — when the target is not present, it sometimes returns Some(idx) instead of None. Fix the function so the existing tests pass. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "/// Find target in sorted slice. Returns Some(index) if found, None otherwise.\npub fn binary_search<T: Ord>(arr: &[T], target: &T) -> Option<usize> {\n    let mut low = 0;\n    let mut high = arr.len();\n    while low <= high {\n        let mid = (low + high) / 2;\n        match arr[mid].cmp(target) {\n            std::cmp::Ordering::Equal => return Some(mid),\n            std::cmp::Ordering::Less => low = mid + 1,\n            std::cmp::Ordering::Greater => high = mid - 1,\n        }\n    }\n    None\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn finds_target() {\n        let v = vec![1, 3, 5, 7, 9];\n        assert_eq!(binary_search(&v, &5), Some(2));\n        assert_eq!(binary_search(&v, &1), Some(0));\n        assert_eq!(binary_search(&v, &9), Some(4));\n    }\n\n    #[test]\n    fn returns_none_when_absent() {\n        let v = vec![1, 3, 5, 7, 9];\n        assert_eq!(binary_search(&v, &4), None);\n        assert_eq!(binary_search(&v, &0), None);\n        assert_eq!(binary_search(&v, &10), None);\n    }\n\n    #[test]\n    fn empty_slice() {\n        let v: Vec<i32> = vec![];\n        assert_eq!(binary_search(&v, &5), None);\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Bugs: (1) `low <= high` should be `low < high` since high is exclusive; (2) `arr[mid]` panics when mid is out of bounds with `low <= high` and `high - 1` underflow when high=0.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}

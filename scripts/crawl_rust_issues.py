@@ -91,13 +91,23 @@ def list_recent_closed_prs(owner: str, name: str, max_prs: int) -> list[dict]:
     )
     if not isinstance(prs, list):
         return []
+    NOISE = (
+        "rollup", "merge ", "version bump", "bump version", "release ",
+        "dependabot", "[bot]", "release-plz", "weekly", "auto-update",
+    )
     candidates = []
     for pr in prs:
         if pr.get("merged_at") is None:
             continue
         title = (pr.get("title") or "").lower()
         body = (pr.get("body") or "").lower()
-        if not any(k in title or k in body for k in ("fix", "close", "resolve")):
+        author = (pr.get("user") or {}).get("login", "").lower()
+        if any(n in title for n in NOISE) or any(n in author for n in ("dependabot", "renovate", "bot")):
+            continue
+        # Must mention fix/close/resolve in title OR body, AND link an issue
+        mentions_fix = any(k in title or k in body for k in ("fix", "close", "resolve"))
+        links_issue = "#" in (title + body)
+        if not (mentions_fix and links_issue):
             continue
         candidates.append(pr)
         if len(candidates) >= max_prs:

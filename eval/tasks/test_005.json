@@ -1,0 +1,11 @@
+{
+  "id": "test_005",
+  "sub_eval": "test",
+  "task_prompt": "Add a `#[test]` block testing `Counter`. Include cases for: initial value is 0, single increment, multiple increments, and `reset` returning to 0. Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "pub struct Counter {\n    value: i32,\n}\n\nimpl Counter {\n    pub fn new() -> Self { Counter { value: 0 } }\n    pub fn value(&self) -> i32 { self.value }\n    pub fn increment(&mut self) { self.value += 1; }\n    pub fn reset(&mut self) { self.value = 0; }\n}\n\nfn main() {\n    let mut c = Counter::new();\n    c.increment();\n    println!(\"{}\", c.value());\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Stateful struct; tests should cover all four methods."
+}

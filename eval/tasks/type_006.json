@@ -1,0 +1,11 @@
+{
+  "id": "type_006",
+  "sub_eval": "type",
+  "task_prompt": "Fix the trait bound errors. The function should print the items twice using `Display`. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn print_twice<T>(items: &[T]) {\n    for item in items {\n        println!(\"{}\", item);\n    }\n    for item in items {\n        println!(\"{}\", item);\n    }\n}\n\nfn main() {\n    let v = vec![1, 2, 3];\n    print_twice(&v);\n    let s = vec![\"a\", \"b\", \"c\"];\n    print_twice(&s);\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "T must impl Display. Fix: `<T: std::fmt::Display>` or use Debug + `{:?}`."
+}
