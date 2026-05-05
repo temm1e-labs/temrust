@@ -10,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-from eval.clients import TogetherClient
+from eval.clients import make_client
 from eval.extractors import extract_rust_code
 from eval.schema import EvalResult, EvalTask
 from eval.verifiers import have_cargo, run_verifier
@@ -31,7 +31,7 @@ def load_tasks(tasks_dir: Path) -> list[EvalTask]:
     return out
 
 
-def run_one(client: TogetherClient, task: EvalTask) -> EvalResult:
+def run_one(client, task: EvalTask) -> EvalResult:
     t0 = time.time()
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
@@ -60,7 +60,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True, help="Model id, e.g. Qwen/Qwen3-1.7B")
     ap.add_argument("--tasks", default="eval/tasks", help="Path to tasks directory")
-    ap.add_argument("--provider", default="together", choices=["together"], help="Inference backend")
+    ap.add_argument("--provider", default="together", choices=["together", "ollama"], help="Inference backend")
     ap.add_argument("--out", default=None, help="Output JSON file (default: eval/results/<model>__<ts>.json)")
     ap.add_argument("--limit", type=int, default=0, help="Run only first N tasks (0=all)")
     args = ap.parse_args()
@@ -83,10 +83,7 @@ def main() -> int:
 
     print(f"Running {len(tasks)} tasks on {args.model} via {args.provider}")
 
-    if args.provider == "together":
-        client = TogetherClient(args.model)
-    else:
-        raise ValueError(f"unknown provider: {args.provider}")
+    client = make_client(args.provider, args.model)
 
     results: list[EvalResult] = []
     pass_count = 0

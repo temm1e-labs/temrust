@@ -1,0 +1,11 @@
+{
+  "id": "test_004",
+  "sub_eval": "test",
+  "task_prompt": "Add a `#[test]` block testing `parse_csv_line`. Test with: empty string, single field, multiple comma-separated fields, fields with surrounding whitespace (the implementation does NOT trim — fields are kept verbatim). Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "pub fn parse_csv_line(line: &str) -> Vec<String> {\n    line.split(',').map(|s| s.to_string()).collect()\n}\n\nfn main() {\n    println!(\"{:?}\", parse_csv_line(\"a,b,c\"));\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Implementation does not trim. Tests must reflect that '  a  ' stays '  a  '."
+}

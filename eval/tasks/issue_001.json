@@ -1,0 +1,15 @@
+{
+  "id": "issue_001",
+  "sub_eval": "issue",
+  "task_prompt": "There's a bug in the `add` function in `src/lib.rs`: it's currently subtracting instead of adding. Fix it so the existing test passes. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "/// Adds two integers.\npub fn add(a: i32, b: i32) -> i32 {\n    a - b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn it_adds() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Trivial bug fix; the test already exists. Tests model's ability to read failing tests and fix the implementation.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}

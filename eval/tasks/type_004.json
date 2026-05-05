@@ -1,0 +1,11 @@
+{
+  "id": "type_004",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type / generics errors. The function should return the longer of two slices (whichever has more elements). Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn longer<T>(a: &[T], b: &[T]) -> &[T] {\n    if a.len() >= b.len() { a } else { b }\n}\n\nfn main() {\n    let x = vec![1, 2, 3];\n    let y = vec![4, 5];\n    println!(\"{:?}\", longer(&x, &y));\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Missing lifetime annotation on the return type — borrow checker / lifetime elision can't infer when there are two `&` inputs of the same lifetime returned."
+}

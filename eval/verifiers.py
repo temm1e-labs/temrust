@@ -26,19 +26,19 @@ edition = "2021"
 
 
 def _write_project(tempdir: Path, task: EvalTask, model_code: str) -> None:
-    """Set up a fresh cargo project. Model code goes in src/main.rs by default."""
-    src = tempdir / "src"
-    src.mkdir(exist_ok=True)
+    """Set up a fresh cargo project. Model code goes in task.target_file."""
     (tempdir / "Cargo.toml").write_text(
         task.extra_files.get("Cargo.toml", DEFAULT_CARGO_TOML)
     )
-    (src / "main.rs").write_text(model_code)
+    target = tempdir / task.target_file
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(model_code)
     for path, content in task.extra_files.items():
-        if path == "Cargo.toml":
+        if path == "Cargo.toml" or path == task.target_file:
             continue
-        target = tempdir / path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content)
+        extra = tempdir / path
+        extra.parent.mkdir(parents=True, exist_ok=True)
+        extra.write_text(content)
 
 
 def run_verifier(task: EvalTask, model_code: str, timeout_s: int = 60) -> tuple[bool, str, str]:

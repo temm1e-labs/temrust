@@ -1,0 +1,11 @@
+{
+  "id": "borrow_005",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow-checker error. The function should mutate the vec in place: increment every element by `delta` returned from a closure that reads the vec's first element. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn shift_by_first(v: &mut Vec<i32>) {\n    let delta = v[0];\n    for x in v.iter_mut() {\n        *x += delta;\n    }\n}\n\nfn shift_by_first_v2(v: &mut Vec<i32>) {\n    let first = &v[0];\n    for x in v.iter_mut() {\n        *x += *first;\n    }\n}\n\nfn main() {\n    let mut v = vec![10, 20, 30];\n    shift_by_first_v2(&mut v);\n    println!(\"{:?}\", v);\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "`shift_by_first_v2` has the borrow-conflict (immutable borrow of first while iter_mut takes mutable). The first version is correct (i32 is Copy). Model should keep the working v1 and remove or fix v2 — best is to make v2 do the same thing with a copy."
+}

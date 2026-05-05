@@ -1,0 +1,11 @@
+{
+  "id": "borrow_004",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow checker error. The function should return both the largest item and the count of items larger than the average. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn analyze(nums: Vec<i32>) -> (i32, usize) {\n    let max = nums.iter().max().unwrap();\n    let sum: i32 = nums.iter().sum();\n    let avg = sum / nums.len() as i32;\n    let count = nums.into_iter().filter(|n| n > &avg).count();\n    (*max, count)\n}\n\nfn main() {\n    let v = vec![1, 5, 3, 8, 2, 7];\n    let (m, c) = analyze(v);\n    println!(\"max={}, above_avg={}\", m, c);\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "`max` borrows from `nums`, then `nums.into_iter()` consumes it — borrow conflict. Fix: dereference / clone max first, or restructure to consume only once."
+}

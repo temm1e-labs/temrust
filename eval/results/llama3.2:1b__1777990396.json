@@ -1,0 +1,31 @@
+{
+  "model": "llama3.2:1b",
+  "provider": "ollama",
+  "n_tasks": 2,
+  "n_passed": 2,
+  "pass_rate": 1.0,
+  "results": [
+    {
+      "task_id": "borrow_001",
+      "model_id": "llama3.2:1b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn main() {\n    let mut names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = &names[0]; // Use reference to avoid borrowing error\n    for name in &names { // Use reference to avoid borrowing error\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}\n```",
+      "extracted_patch": "fn main() {\n    let mut names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = &names[0]; // Use reference to avoid borrowing error\n    for name in &names { // Use reference to avoid borrowing error\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_eqlvngpo)\nwarning: variable does not need to be mutable\n --> src/main.rs:2:9\n  |\n2 |     let mut names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n  |         ----^^^^^\n  |         |\n  |         help: remove this `mut`\n  |\n  = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default\n\nwarning: `temrust_eval` (bin \"temrust_eval\") generated 1 warning (run `cargo fix --bin \"temrust_eval\" -p temrust_eval` to apply 1 suggestion)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.82s\n",
+      "duration_seconds": 11.015935182571411
+    },
+    {
+      "task_id": "borrow_002",
+      "model_id": "llama3.2:1b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn longest_len(items: Vec<String>) -> usize {\n    items.iter().map(|item| item.len()).max().unwrap()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}\n```",
+      "extracted_patch": "fn longest_len(items: Vec<String>) -> usize {\n    items.iter().map(|item| item.len()).max().unwrap()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_efvtzcp8)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s\n",
+      "duration_seconds": 1.5689661502838135
+    }
+  ]
+}

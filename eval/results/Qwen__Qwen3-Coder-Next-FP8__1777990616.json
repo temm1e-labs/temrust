@@ -1,0 +1,207 @@
+{
+  "model": "Qwen/Qwen3-Coder-Next-FP8",
+  "provider": "together",
+  "n_tasks": 18,
+  "n_passed": 16,
+  "pass_rate": 0.8888888888888888,
+  "results": [
+    {
+      "task_id": "borrow_001",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn main() {\n    let names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = names[0].clone();\n    for name in names {\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}\n```",
+      "extracted_patch": "fn main() {\n    let names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = names[0].clone();\n    for name in names {\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust__rdsl6q7)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 1.2052879333496094
+    },
+    {
+      "task_id": "borrow_002",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "Looking at this code, I see the borrow-checker error. The issue is that `longest` is trying to hold a reference to an element in `items`, but when we iterate over `items` with `for item in items`, we're taking ownership of each element (consuming the vector). Additionally, `longest` is a reference to a `String`, but we're trying to store references to elements that are being moved.\n\nThe fix is to avoid storing references and instead track the index or the length directly. Since we only need to return the length, we can track the maximum length seen so far.\n\n```rust\nfn longest_len(items: Vec<String>) -> usize {\n    if items.is_empty() {\n        return 0;\n    }\n    \n    let mut max_len = items[0].len();\n    for item in items {\n        if item.len() > max_len {\n            max_len = item.len();\n        }\n    }\n    max_len\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}\n```",
+      "extracted_patch": "fn longest_len(items: Vec<String>) -> usize {\n    if items.is_empty() {\n        return 0;\n    }\n    \n    let mut max_len = items[0].len();\n    for item in items {\n        if item.len() > max_len {\n            max_len = item.len();\n        }\n    }\n    max_len\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_enoke268)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s\n",
+      "duration_seconds": 2.348529815673828
+    },
+    {
+      "task_id": "borrow_003",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "Looking at the code, the borrow-checker error occurs because `prefix` is being moved into the function, and then we're trying to use it in the loop. However, the main issue is that `prefix` is consumed on the first iteration of the loop when we do `prefix + &item`, so it's no longer available for subsequent iterations.\n\nThe fix is to either:\n1. Take `prefix` by reference, or\n2. Clone `prefix` for each iteration\n\nSince the function signature takes ownership of `prefix`, the cleanest solution is to take `prefix` as a `&str` reference instead of `String`, which avoids the ownership issue entirely.\n\n```rust\nfn prefix_all(prefix: &str, items: Vec<String>) -> Vec<String> {\n    let mut out = Vec::new();\n    for item in items {\n        let combined = format!(\"{}{}\", prefix, item);\n        out.push(combined);\n    }\n    out\n}\n\nfn main() {\n    let v = vec![String::from(\"alice\"), String::from(\"bob\")];\n    for s in prefix_all(\"hi \", v) {\n        println!(\"{}\", s);\n    }\n}\n```",
+      "extracted_patch": "fn prefix_all(prefix: &str, items: Vec<String>) -> Vec<String> {\n    let mut out = Vec::new();\n    for item in items {\n        let combined = format!(\"{}{}\", prefix, item);\n        out.push(combined);\n    }\n    out\n}\n\nfn main() {\n    let v = vec![String::from(\"alice\"), String::from(\"bob\")];\n    for s in prefix_all(\"hi \", v) {\n        println!(\"{}\", s);\n    }\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_5tb9iv4r)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s\n",
+      "duration_seconds": 2.6876730918884277
+    },
+    {
+      "task_id": "borrow_004",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "Looking at the code, I see the borrow checker error occurs because:\n\n1. `nums.into_iter()` consumes the vector, but we need to use `nums` again after this\n2. Actually, looking more carefully, the issue is that `nums.into_iter()` is used after we've already borrowed from `nums` with `nums.iter()`, but the real problem is that `into_iter()` consumes the vector, making it unavailable for any further use.\n\nHowever, the main issue is that we're trying to use `nums` after consuming it with `into_iter()`. But actually, looking at the code flow, we don't need `nums` after the `into_iter()` call, so that's not the borrow issue.\n\nThe real issue is that we're using `nums.iter()` first (which borrows), and then trying to use `nums.into_iter()` (which would move/consume). Since the borrow from `iter()` might still be active, this causes a conflict.\n\nThe fix is to either:\n1. Use `iter()` consistently and clone the values we need, or\n2. Reorder operations to avoid the conflict\n\nHere's the corrected version:\n\n```rust\nfn analyze(nums: Vec<i32>) -> (i32, usize) {\n    let max = nums.iter().max().copied().unwrap_or(0);\n    let sum: i32 = nums.iter().sum();\n    let avg = sum / nums.len() as i32;\n    let count = nums.iter().filter(|&&n| n > avg).count();\n    (max, count)\n}\n\nfn main() {\n    let v = vec![1, 5, 3, 8, 2, 7];\n    let (m, c) = analyze(v);\n    println!(\"max={}, above_avg={}\", m, c);\n}\n```\n\nKey changes:\n- Used `copied()` instead of `unwrap()` to get `i32` directly from `Option<&i32>`\n- Used `iter()` consistently throughout instead of consuming with `into_iter()`\n- Changed the filter closure from `|n| n > &avg` to `|&&n| n > avg` to work with references properly\n- Added `unwrap_or(0)` as a safety measure for empty vectors",
+      "extracted_patch": "fn analyze(nums: Vec<i32>) -> (i32, usize) {\n    let max = nums.iter().max().copied().unwrap_or(0);\n    let sum: i32 = nums.iter().sum();\n    let avg = sum / nums.len() as i32;\n    let count = nums.iter().filter(|&&n| n > avg).count();\n    (max, count)\n}\n\nfn main() {\n    let v = vec![1, 5, 3, 8, 2, 7];\n    let (m, c) = analyze(v);\n    println!(\"max={}, above_avg={}\", m, c);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_ckw4l9r6)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 3.831080198287964
+    },
+    {
+      "task_id": "borrow_005",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "The borrow-checker error occurs because in `shift_by_first_v2`, we're trying to hold an immutable reference to `v[0]` (`first`) while also trying to get mutable references to elements of `v` in the loop. Rust's borrowing rules don't allow having both immutable and mutable references to the same data at the same time.\n\nThe solution is to copy the value of the first element before starting the loop, so we don't need to hold a reference to it during the mutable iteration.\n\nHere's the corrected program:\n\n```rust\nfn shift_by_first(v: &mut Vec<i32>) {\n    let delta = v[0];\n    for x in v.iter_mut() {\n        *x += delta;\n    }\n}\n\nfn shift_by_first_v2(v: &mut Vec<i32>) {\n    let first = v[0]; // Copy the value instead of taking a reference\n    for x in v.iter_mut() {\n        *x += first;\n    }\n}\n\nfn main() {\n    let mut v = vec![10, 20, 30];\n    shift_by_first_v2(&mut v);\n    println!(\"{:?}\", v);\n}\n```",
+      "extracted_patch": "fn shift_by_first(v: &mut Vec<i32>) {\n    let delta = v[0];\n    for x in v.iter_mut() {\n        *x += delta;\n    }\n}\n\nfn shift_by_first_v2(v: &mut Vec<i32>) {\n    let first = v[0]; // Copy the value instead of taking a reference\n    for x in v.iter_mut() {\n        *x += first;\n    }\n}\n\nfn main() {\n    let mut v = vec![10, 20, 30];\n    shift_by_first_v2(&mut v);\n    println!(\"{:?}\", v);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_1aaa1yp8)\nwarning: function `shift_by_first` is never used\n --> src/main.rs:1:4\n  |\n1 | fn shift_by_first(v: &mut Vec<i32>) {\n  |    ^^^^^^^^^^^^^^\n  |\n  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default\n\nwarning: `temrust_eval` (bin \"temrust_eval\") generated 1 warning\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s\n",
+      "duration_seconds": 3.2157771587371826
+    },
+    {
+      "task_id": "borrow_006",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nuse std::collections::HashMap;\n\nfn bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get(key).copied().unwrap_or(0);\n    let new_val = current + 1;\n    map.insert(key.to_string(), new_val);\n    new_val\n}\n\nfn double_bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get(key).copied().unwrap_or(0);\n    let new_val = current + 1;\n    map.insert(key.to_string(), new_val);\n    new_val\n}\n\nfn main() {\n    let mut m = HashMap::new();\n    m.insert(String::from(\"a\"), 5);\n    println!(\"{}\", bump(&mut m, \"a\"));\n    println!(\"{}\", double_bump(&mut m, \"a\"));\n}\n```",
+      "extracted_patch": "use std::collections::HashMap;\n\nfn bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get(key).copied().unwrap_or(0);\n    let new_val = current + 1;\n    map.insert(key.to_string(), new_val);\n    new_val\n}\n\nfn double_bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get(key).copied().unwrap_or(0);\n    let new_val = current + 1;\n    map.insert(key.to_string(), new_val);\n    new_val\n}\n\nfn main() {\n    let mut m = HashMap::new();\n    m.insert(String::from(\"a\"), 5);\n    println!(\"{}\", bump(&mut m, \"a\"));\n    println!(\"{}\", double_bump(&mut m, \"a\"));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_6cfvywo_)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s\n",
+      "duration_seconds": 2.3667078018188477
+    },
+    {
+      "task_id": "issue_001",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\n/// Adds two integers.\npub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn it_adds() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n    }\n}\n```",
+      "extracted_patch": "/// Adds two integers.\npub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn it_adds() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n    }\n}",
+      "verifier_stdout": "\nrunning 1 test\ntest tests::it_adds ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_2nfj3v40)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s\n     Running unittests src/lib.rs (target/debug/deps/temrust_eval-2bf83dbfe19af2fb)\n   Doc-tests temrust_eval\n",
+      "duration_seconds": 2.1037440299987793
+    },
+    {
+      "task_id": "issue_002",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\npub struct Stack<T> {\n    items: Vec<T>,\n}\n\nimpl<T> Stack<T> {\n    pub fn new() -> Self {\n        Stack { items: Vec::new() }\n    }\n\n    pub fn push(&mut self, item: T) {\n        self.items.push(item);\n    }\n\n    pub fn pop(&mut self) -> Option<T> {\n        if self.items.is_empty() {\n            None\n        } else {\n            Some(self.items.pop().unwrap())\n        }\n    }\n\n    pub fn len(&self) -> usize {\n        self.items.len()\n    }\n\n    pub fn is_empty(&self) -> bool {\n        self.items.is_empty()\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn lifo_order() {\n        let mut s = Stack::new();\n        s.push(1);\n        s.push(2);\n        s.push(3);\n        assert_eq!(s.pop(), Some(3));\n        assert_eq!(s.pop(), Some(2));\n        assert_eq!(s.pop(), Some(1));\n        assert_eq!(s.pop(), None);\n    }\n\n    #[test]\n    fn empty_pop() {\n        let mut s: Stack<i32> = Stack::new();\n        assert_eq!(s.pop(), None);\n    }\n}\n```",
+      "extracted_patch": "pub struct Stack<T> {\n    items: Vec<T>,\n}\n\nimpl<T> Stack<T> {\n    pub fn new() -> Self {\n        Stack { items: Vec::new() }\n    }\n\n    pub fn push(&mut self, item: T) {\n        self.items.push(item);\n    }\n\n    pub fn pop(&mut self) -> Option<T> {\n        if self.items.is_empty() {\n            None\n        } else {\n            Some(self.items.pop().unwrap())\n        }\n    }\n\n    pub fn len(&self) -> usize {\n        self.items.len()\n    }\n\n    pub fn is_empty(&self) -> bool {\n        self.items.is_empty()\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn lifo_order() {\n        let mut s = Stack::new();\n        s.push(1);\n        s.push(2);\n        s.push(3);\n        assert_eq!(s.pop(), Some(3));\n        assert_eq!(s.pop(), Some(2));\n        assert_eq!(s.pop(), Some(1));\n        assert_eq!(s.pop(), None);\n    }\n\n    #[test]\n    fn empty_pop() {\n        let mut s: Stack<i32> = Stack::new();\n        assert_eq!(s.pop(), None);\n    }\n}",
+      "verifier_stdout": "\nrunning 2 tests\ntest tests::lifo_order ... ok\ntest tests::empty_pop ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_5_km53rh)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n     Running unittests src/lib.rs (target/debug/deps/temrust_eval-2bf83dbfe19af2fb)\n   Doc-tests temrust_eval\n",
+      "duration_seconds": 3.223762035369873
+    },
+    {
+      "task_id": "issue_003",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\n#[derive(Debug, PartialEq, Eq)]\npub struct Version {\n    pub major: u32,\n    pub minor: u32,\n    pub patch: u32,\n}\n\npub fn parse_version(s: &str) -> Result<Version, String> {\n    let parts: Vec<&str> = s.split('.').collect();\n    if parts.len() != 3 {\n        return Err(format!(\"expected 3 parts, got {}\", parts.len()));\n    }\n    // Fixed: indices now correctly map to major, minor, patch from left to right\n    let major: u32 = parts[0].parse().map_err(|e| format!(\"major: {}\", e))?;\n    let minor: u32 = parts[1].parse().map_err(|e| format!(\"minor: {}\", e))?;\n    let patch: u32 = parts[2].parse().map_err(|e| format!(\"patch: {}\", e))?;\n    Ok(Version { major, minor, patch })\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn parses_simple() {\n        assert_eq!(\n            parse_version(\"1.2.3\").unwrap(),\n            Version { major: 1, minor: 2, patch: 3 }\n        );\n    }\n\n    #[test]\n    fn parses_zeros() {\n        assert_eq!(\n            parse_version(\"0.0.0\").unwrap(),\n            Version { major: 0, minor: 0, patch: 0 }\n        );\n    }\n\n    #[test]\n    fn rejects_bad_input() {\n        assert!(parse_version(\"1.2\").is_err());\n        assert!(parse_version(\"1.2.x\").is_err());\n    }\n}\n```",
+      "extracted_patch": "#[derive(Debug, PartialEq, Eq)]\npub struct Version {\n    pub major: u32,\n    pub minor: u32,\n    pub patch: u32,\n}\n\npub fn parse_version(s: &str) -> Result<Version, String> {\n    let parts: Vec<&str> = s.split('.').collect();\n    if parts.len() != 3 {\n        return Err(format!(\"expected 3 parts, got {}\", parts.len()));\n    }\n    // Fixed: indices now correctly map to major, minor, patch from left to right\n    let major: u32 = parts[0].parse().map_err(|e| format!(\"major: {}\", e))?;\n    let minor: u32 = parts[1].parse().map_err(|e| format!(\"minor: {}\", e))?;\n    let patch: u32 = parts[2].parse().map_err(|e| format!(\"patch: {}\", e))?;\n    Ok(Version { major, minor, patch })\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn parses_simple() {\n        assert_eq!(\n            parse_version(\"1.2.3\").unwrap(),\n            Version { major: 1, minor: 2, patch: 3 }\n        );\n    }\n\n    #[test]\n    fn parses_zeros() {\n        assert_eq!(\n            parse_version(\"0.0.0\").unwrap(),\n            Version { major: 0, minor: 0, patch: 0 }\n        );\n    }\n\n    #[test]\n    fn rejects_bad_input() {\n        assert!(parse_version(\"1.2\").is_err());\n        assert!(parse_version(\"1.2.x\").is_err());\n    }\n}",
+      "verifier_stdout": "\nrunning 3 tests\ntest tests::parses_simple ... ok\ntest tests::parses_zeros ... ok\ntest tests::rejects_bad_input ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_j462trw4)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s\n     Running unittests src/lib.rs (target/debug/deps/temrust_eval-2bf83dbfe19af2fb)\n   Doc-tests temrust_eval\n",
+      "duration_seconds": 3.4776039123535156
+    },
+    {
+      "task_id": "test_001",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\npub fn is_palindrome(s: &str) -> bool {\n    let chars: Vec<char> = s.chars().collect();\n    let n = chars.len();\n    for i in 0..n / 2 {\n        if chars[i] != chars[n - 1 - i] {\n            return false;\n        }\n    }\n    true\n}\n\nfn main() {\n    println!(\"{}\", is_palindrome(\"racecar\"));\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_empty_string() {\n        assert!(is_palindrome(\"\"));\n    }\n\n    #[test]\n    fn test_single_character() {\n        assert!(is_palindrome(\"a\"));\n        assert!(is_palindrome(\"Z\"));\n        assert!(is_palindrome(\"5\"));\n    }\n\n    #[test]\n    fn test_simple_palindrome() {\n        assert!(is_palindrome(\"racecar\"));\n        assert!(is_palindrome(\"level\"));\n        assert!(is_palindrome(\"radar\"));\n        assert!(is_palindrome(\"madam\"));\n        assert!(is_palindrome(\"noon\"));\n        assert!(is_palindrome(\"aba\"));\n        assert!(is_palindrome(\"abba\"));\n    }\n\n    #[test]\n    fn test_non_palindrome() {\n        assert!(!is_palindrome(\"hello\"));\n        assert!(!is_palindrome(\"world\"));\n        assert!(!is_palindrome(\"rust\"));\n        assert!(!is_palindrome(\"abc\"));\n        assert!(!is_palindrome(\"abca\"));\n    }\n\n    #[test]\n    fn test_mixed_case() {\n        // Case-sensitive: 'A' != 'a'\n        assert!(!is_palindrome(\"Racecar\"));\n        assert!(!is_palindrome(\"RaceCar\"));\n        assert!(is_palindrome(\"racecar\"));\n        assert!(is_palindrome(\"Aa\"));\n        assert!(!is_palindrome(\"ABa\"));\n        assert!(is_palindrome(\"aa\"));\n    }\n\n    #[test]\n    fn test_unicode_characters() {\n        assert!(is_palindrome(\"\u3042\u3044\u3042\"));\n        assert!(!is_palindrome(\"\u3042\u3044\u3048\"));\n    }\n}\n```",
+      "extracted_patch": "pub fn is_palindrome(s: &str) -> bool {\n    let chars: Vec<char> = s.chars().collect();\n    let n = chars.len();\n    for i in 0..n / 2 {\n        if chars[i] != chars[n - 1 - i] {\n            return false;\n        }\n    }\n    true\n}\n\nfn main() {\n    println!(\"{}\", is_palindrome(\"racecar\"));\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_empty_string() {\n        assert!(is_palindrome(\"\"));\n    }\n\n    #[test]\n    fn test_single_character() {\n        assert!(is_palindrome(\"a\"));\n        assert!(is_palindrome(\"Z\"));\n        assert!(is_palindrome(\"5\"));\n    }\n\n    #[test]\n    fn test_simple_palindrome() {\n        assert!(is_palindrome(\"racecar\"));\n        assert!(is_palindrome(\"level\"));\n        assert!(is_palindrome(\"radar\"));\n        assert!(is_palindrome(\"madam\"));\n        assert!(is_palindrome(\"noon\"));\n        assert!(is_palindrome(\"aba\"));\n        assert!(is_palindrome(\"abba\"));\n    }\n\n    #[test]\n    fn test_non_palindrome() {\n        assert!(!is_palindrome(\"hello\"));\n        assert!(!is_palindrome(\"world\"));\n        assert!(!is_palindrome(\"rust\"));\n        assert!(!is_palindrome(\"abc\"));\n        assert!(!is_palindrome(\"abca\"));\n    }\n\n    #[test]\n    fn test_mixed_case() {\n        // Case-sensitive: 'A' != 'a'\n        assert!(!is_palindrome(\"Racecar\"));\n        assert!(!is_palindrome(\"RaceCar\"));\n        assert!(is_palindrome(\"racecar\"));\n        assert!(is_palindrome(\"Aa\"));\n        assert!(!is_palindrome(\"ABa\"));\n        assert!(is_palindrome(\"aa\"));\n    }\n\n    #[test]\n    fn test_unicode_characters() {\n        assert!(is_palindrome(\"\u3042\u3044\u3042\"));\n        assert!(!is_palindrome(\"\u3042\u3044\u3048\"));\n    }\n}",
+      "verifier_stdout": "\nrunning 6 tests\ntest tests::test_empty_string ... ok\ntest tests::test_non_palindrome ... ok\ntest tests::test_simple_palindrome ... ok\ntest tests::test_single_character ... ok\ntest tests::test_unicode_characters ... ok\ntest tests::test_mixed_case ... FAILED\n\nfailures:\n\n---- tests::test_mixed_case stdout ----\n\nthread 'tests::test_mixed_case' (16275439) panicked at src/main.rs:58:9:\nassertion failed: is_palindrome(\"Aa\")\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    tests::test_mixed_case\n\ntest result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_v2qjtlqm)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s\n     Running unittests src/main.rs (target/debug/deps/temrust_eval-9576ba5eee5db900)\nerror: test failed, to rerun pass `--bin temrust_eval`\n",
+      "duration_seconds": 5.110132932662964
+    },
+    {
+      "task_id": "test_002",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\npub fn count_vowels(s: &str) -> usize {\n    s.chars()\n        .filter(|c| matches!(c.to_ascii_lowercase(), 'a' | 'e' | 'i' | 'o' | 'u'))\n        .count()\n}\n\nfn main() {\n    println!(\"{}\", count_vowels(\"Hello World\"));\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_empty_string() {\n        assert_eq!(count_vowels(\"\"), 0);\n    }\n\n    #[test]\n    fn test_all_vowels() {\n        assert_eq!(count_vowels(\"aeiou\"), 5);\n        assert_eq!(count_vowels(\"AEIOU\"), 5);\n        assert_eq!(count_vowels(\"aAeEiIoOuU\"), 10);\n    }\n\n    #[test]\n    fn test_no_vowels() {\n        assert_eq!(count_vowels(\"bcdfg\"), 0);\n        assert_eq!(count_vowels(\"BCDFG\"), 0);\n        assert_eq!(count_vowels(\"123!@#\"), 0);\n    }\n\n    #[test]\n    fn test_mixed_letters() {\n        assert_eq!(count_vowels(\"Hello World\"), 3);\n        assert_eq!(count_vowels(\"Rust Programming\"), 5);\n        assert_eq!(count_vowels(\"The quick brown fox jumps over the lazy dog\"), 11);\n    }\n\n    #[test]\n    fn test_uppercase_letters() {\n        assert_eq!(count_vowels(\"HELLO\"), 2);\n        assert_eq!(count_vowels(\"AEIOU\"), 5);\n        assert_eq!(count_vowels(\"XYZ\"), 0);\n    }\n\n    #[test]\n    fn test_mixed_case() {\n        assert_eq!(count_vowels(\"HeLLo\"), 2);\n        assert_eq!(count_vowels(\"aEiOu\"), 5);\n        assert_eq!(count_vowels(\"AbCdEfGhIjKlMnOpQrStUvWxYz\"), 5);\n    }\n\n    #[test]\n    fn test_special_characters_and_spaces() {\n        assert_eq!(count_vowels(\"a e i o u\"), 5);\n        assert_eq!(count_vowels(\"hello, world!\"), 3);\n        assert_eq!(count_vowels(\"a1e2i3o4u5\"), 5);\n    }\n}\n```",
+      "extracted_patch": "pub fn count_vowels(s: &str) -> usize {\n    s.chars()\n        .filter(|c| matches!(c.to_ascii_lowercase(), 'a' | 'e' | 'i' | 'o' | 'u'))\n        .count()\n}\n\nfn main() {\n    println!(\"{}\", count_vowels(\"Hello World\"));\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_empty_string() {\n        assert_eq!(count_vowels(\"\"), 0);\n    }\n\n    #[test]\n    fn test_all_vowels() {\n        assert_eq!(count_vowels(\"aeiou\"), 5);\n        assert_eq!(count_vowels(\"AEIOU\"), 5);\n        assert_eq!(count_vowels(\"aAeEiIoOuU\"), 10);\n    }\n\n    #[test]\n    fn test_no_vowels() {\n        assert_eq!(count_vowels(\"bcdfg\"), 0);\n        assert_eq!(count_vowels(\"BCDFG\"), 0);\n        assert_eq!(count_vowels(\"123!@#\"), 0);\n    }\n\n    #[test]\n    fn test_mixed_letters() {\n        assert_eq!(count_vowels(\"Hello World\"), 3);\n        assert_eq!(count_vowels(\"Rust Programming\"), 5);\n        assert_eq!(count_vowels(\"The quick brown fox jumps over the lazy dog\"), 11);\n    }\n\n    #[test]\n    fn test_uppercase_letters() {\n        assert_eq!(count_vowels(\"HELLO\"), 2);\n        assert_eq!(count_vowels(\"AEIOU\"), 5);\n        assert_eq!(count_vowels(\"XYZ\"), 0);\n    }\n\n    #[test]\n    fn test_mixed_case() {\n        assert_eq!(count_vowels(\"HeLLo\"), 2);\n        assert_eq!(count_vowels(\"aEiOu\"), 5);\n        assert_eq!(count_vowels(\"AbCdEfGhIjKlMnOpQrStUvWxYz\"), 5);\n    }\n\n    #[test]\n    fn test_special_characters_and_spaces() {\n        assert_eq!(count_vowels(\"a e i o u\"), 5);\n        assert_eq!(count_vowels(\"hello, world!\"), 3);\n        assert_eq!(count_vowels(\"a1e2i3o4u5\"), 5);\n    }\n}",
+      "verifier_stdout": "\nrunning 7 tests\ntest tests::test_all_vowels ... ok\ntest tests::test_empty_string ... ok\ntest tests::test_no_vowels ... ok\ntest tests::test_special_characters_and_spaces ... ok\ntest tests::test_uppercase_letters ... ok\ntest tests::test_mixed_case ... ok\ntest tests::test_mixed_letters ... FAILED\n\nfailures:\n\n---- tests::test_mixed_letters stdout ----\n\nthread 'tests::test_mixed_letters' (16275625) panicked at src/main.rs:37:9:\nassertion `left == right` failed\n  left: 4\n right: 5\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    tests::test_mixed_letters\n\ntest result: FAILED. 6 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_6vbswv_b)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s\n     Running unittests src/main.rs (target/debug/deps/temrust_eval-9576ba5eee5db900)\nerror: test failed, to rerun pass `--bin temrust_eval`\n",
+      "duration_seconds": 5.677412271499634
+    },
+    {
+      "task_id": "test_003",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\npub fn fizzbuzz(n: u32) -> String {\n    match (n % 3, n % 5) {\n        (0, 0) => String::from(\"FizzBuzz\"),\n        (0, _) => String::from(\"Fizz\"),\n        (_, 0) => String::from(\"Buzz\"),\n        _ => n.to_string(),\n    }\n}\n\nfn main() {\n    for i in 1..=15 {\n        println!(\"{}\", fizzbuzz(i));\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_fizzbuzz() {\n        assert_eq!(fizzbuzz(1), \"1\");\n        assert_eq!(fizzbuzz(3), \"Fizz\");\n        assert_eq!(fizzbuzz(5), \"Buzz\");\n        assert_eq!(fizzbuzz(15), \"FizzBuzz\");\n        assert_eq!(fizzbuzz(7), \"7\");\n    }\n}\n```",
+      "extracted_patch": "pub fn fizzbuzz(n: u32) -> String {\n    match (n % 3, n % 5) {\n        (0, 0) => String::from(\"FizzBuzz\"),\n        (0, _) => String::from(\"Fizz\"),\n        (_, 0) => String::from(\"Buzz\"),\n        _ => n.to_string(),\n    }\n}\n\nfn main() {\n    for i in 1..=15 {\n        println!(\"{}\", fizzbuzz(i));\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_fizzbuzz() {\n        assert_eq!(fizzbuzz(1), \"1\");\n        assert_eq!(fizzbuzz(3), \"Fizz\");\n        assert_eq!(fizzbuzz(5), \"Buzz\");\n        assert_eq!(fizzbuzz(15), \"FizzBuzz\");\n        assert_eq!(fizzbuzz(7), \"7\");\n    }\n}",
+      "verifier_stdout": "\nrunning 1 test\ntest tests::test_fizzbuzz ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_h1r6l7z9)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s\n     Running unittests src/main.rs (target/debug/deps/temrust_eval-9576ba5eee5db900)\n",
+      "duration_seconds": 2.8376429080963135
+    },
+    {
+      "task_id": "test_004",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\npub fn parse_csv_line(line: &str) -> Vec<String> {\n    line.split(',').map(|s| s.to_string()).collect()\n}\n\nfn main() {\n    println!(\"{:?}\", parse_csv_line(\"a,b,c\"));\n}\n\n#[cfg(test)]\nmod tests {\n    use super::parse_csv_line;\n\n    #[test]\n    fn test_parse_csv_line() {\n        // Test empty string\n        assert_eq!(parse_csv_line(\"\"), vec![\"\".to_string()]);\n        \n        // Test single field\n        assert_eq!(parse_csv_line(\"hello\"), vec![\"hello\".to_string()]);\n        \n        // Test multiple comma-separated fields\n        assert_eq!(parse_csv_line(\"a,b,c\"), vec![\"a\".to_string(), \"b\".to_string(), \"c\".to_string()]);\n        \n        // Test fields with surrounding whitespace (no trimming)\n        assert_eq!(parse_csv_line(\" a , b , c \"), vec![\" a \".to_string(), \" b \".to_string(), \" c \".to_string()]);\n    }\n}\n```",
+      "extracted_patch": "pub fn parse_csv_line(line: &str) -> Vec<String> {\n    line.split(',').map(|s| s.to_string()).collect()\n}\n\nfn main() {\n    println!(\"{:?}\", parse_csv_line(\"a,b,c\"));\n}\n\n#[cfg(test)]\nmod tests {\n    use super::parse_csv_line;\n\n    #[test]\n    fn test_parse_csv_line() {\n        // Test empty string\n        assert_eq!(parse_csv_line(\"\"), vec![\"\".to_string()]);\n        \n        // Test single field\n        assert_eq!(parse_csv_line(\"hello\"), vec![\"hello\".to_string()]);\n        \n        // Test multiple comma-separated fields\n        assert_eq!(parse_csv_line(\"a,b,c\"), vec![\"a\".to_string(), \"b\".to_string(), \"c\".to_string()]);\n        \n        // Test fields with surrounding whitespace (no trimming)\n        assert_eq!(parse_csv_line(\" a , b , c \"), vec![\" a \".to_string(), \" b \".to_string(), \" c \".to_string()]);\n    }\n}",
+      "verifier_stdout": "\nrunning 1 test\ntest tests::test_parse_csv_line ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_4o64yyw3)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s\n     Running unittests src/main.rs (target/debug/deps/temrust_eval-9576ba5eee5db900)\n",
+      "duration_seconds": 3.8240230083465576
+    },
+    {
+      "task_id": "type_001",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn main() {\n    let nums: Vec<i32> = vec![1, 2, 3, 4, 5];\n    let total: i32 = nums.iter().sum();\n    let avg = total as f64 / nums.len() as f64;\n    println!(\"avg = {}\", avg);\n}\n```",
+      "extracted_patch": "fn main() {\n    let nums: Vec<i32> = vec![1, 2, 3, 4, 5];\n    let total: i32 = nums.iter().sum();\n    let avg = total as f64 / nums.len() as f64;\n    println!(\"avg = {}\", avg);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_9ep720xj)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s\n",
+      "duration_seconds": 1.419705867767334
+    },
+    {
+      "task_id": "type_002",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn double(s: String) -> String {\n    s.clone() + &s\n}\n\nfn main() {\n    let greeting = String::from(\"hello \");\n    println!(\"{}\", double(greeting));\n}\n```",
+      "extracted_patch": "fn double(s: String) -> String {\n    s.clone() + &s\n}\n\nfn main() {\n    let greeting = String::from(\"hello \");\n    println!(\"{}\", double(greeting));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_gqcb4iam)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 1.370755910873413
+    },
+    {
+      "task_id": "type_003",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn sum_strings(strs: Vec<&str>) -> i32 {\n    let mut total = 0;\n    for s in strs {\n        match s.parse::<i32>() {\n            Ok(num) => total += num,\n            Err(_) => return 0,\n        }\n    }\n    total\n}\n\nfn main() {\n    let v = vec![\"1\", \"2\", \"3\", \"oops\", \"4\"];\n    println!(\"{}\", sum_strings(v));\n}\n```",
+      "extracted_patch": "fn sum_strings(strs: Vec<&str>) -> i32 {\n    let mut total = 0;\n    for s in strs {\n        match s.parse::<i32>() {\n            Ok(num) => total += num,\n            Err(_) => return 0,\n        }\n    }\n    total\n}\n\nfn main() {\n    let v = vec![\"1\", \"2\", \"3\", \"oops\", \"4\"];\n    println!(\"{}\", sum_strings(v));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_l9qfzmbl)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 1.6210439205169678
+    },
+    {
+      "task_id": "type_004",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn longer<'a, T>(a: &'a [T], b: &'a [T]) -> &'a [T] {\n    if a.len() >= b.len() { a } else { b }\n}\n\nfn main() {\n    let x = vec![1, 2, 3];\n    let y = vec![4, 5];\n    println!(\"{:?}\", longer(&x, &y));\n}\n```",
+      "extracted_patch": "fn longer<'a, T>(a: &'a [T], b: &'a [T]) -> &'a [T] {\n    if a.len() >= b.len() { a } else { b }\n}\n\nfn main() {\n    let x = vec![1, 2, 3];\n    let y = vec![4, 5];\n    println!(\"{:?}\", longer(&x, &y));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_xlfzocz7)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 1.3417108058929443
+    },
+    {
+      "task_id": "type_005",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nuse std::collections::HashMap;\n\nfn unique_only(items: Vec<String>) -> Vec<String> {\n    let mut counts: HashMap<String, i32> = HashMap::new();\n    for item in items.clone() {\n        *counts.entry(item).or_insert(0) += 1;\n    }\n    items.into_iter()\n        .filter(|item| counts.get(item) == Some(&1))\n        .collect()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"b\"), String::from(\"a\"), String::from(\"c\")];\n    println!(\"{:?}\", unique_only(v));\n}\n```",
+      "extracted_patch": "use std::collections::HashMap;\n\nfn unique_only(items: Vec<String>) -> Vec<String> {\n    let mut counts: HashMap<String, i32> = HashMap::new();\n    for item in items.clone() {\n        *counts.entry(item).or_insert(0) += 1;\n    }\n    items.into_iter()\n        .filter(|item| counts.get(item) == Some(&1))\n        .collect()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"b\"), String::from(\"a\"), String::from(\"c\")];\n    println!(\"{:?}\", unique_only(v));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_399tvmy8)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 1.9889867305755615
+    }
+  ]
+}

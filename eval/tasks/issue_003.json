@@ -1,0 +1,15 @@
+{
+  "id": "issue_003",
+  "sub_eval": "issue",
+  "task_prompt": "The `parse_version` function has a bug: when parsing `\"1.2.3\"`, it's returning the parts in reverse order. The struct field order should match string left-to-right (`major`, `minor`, `patch`). Fix the bug so the tests pass. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "#[derive(Debug, PartialEq, Eq)]\npub struct Version {\n    pub major: u32,\n    pub minor: u32,\n    pub patch: u32,\n}\n\npub fn parse_version(s: &str) -> Result<Version, String> {\n    let parts: Vec<&str> = s.split('.').collect();\n    if parts.len() != 3 {\n        return Err(format!(\"expected 3 parts, got {}\", parts.len()));\n    }\n    // Bug: indices are reversed\n    let major: u32 = parts[2].parse().map_err(|e| format!(\"major: {}\", e))?;\n    let minor: u32 = parts[1].parse().map_err(|e| format!(\"minor: {}\", e))?;\n    let patch: u32 = parts[0].parse().map_err(|e| format!(\"patch: {}\", e))?;\n    Ok(Version { major, minor, patch })\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn parses_simple() {\n        assert_eq!(\n            parse_version(\"1.2.3\").unwrap(),\n            Version { major: 1, minor: 2, patch: 3 }\n        );\n    }\n\n    #[test]\n    fn parses_zeros() {\n        assert_eq!(\n            parse_version(\"0.0.0\").unwrap(),\n            Version { major: 0, minor: 0, patch: 0 }\n        );\n    }\n\n    #[test]\n    fn rejects_bad_input() {\n        assert!(parse_version(\"1.2\").is_err());\n        assert!(parse_version(\"1.2.x\").is_err());\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Bug: parts[0] should map to major, parts[2] to patch. Index ordering issue.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}

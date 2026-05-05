@@ -1,0 +1,11 @@
+{
+  "id": "borrow_006",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the compile error. The code attempts to read from a HashMap then mutate it. The fix should preserve behaviour: increment the counter for `key`, return the new value. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "use std::collections::HashMap;\n\nfn bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get(key).copied().unwrap_or(0);\n    let new_val = current + 1;\n    map.insert(key.to_string(), new_val);\n    new_val\n}\n\nfn double_bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get(key).unwrap();\n    map.insert(key.to_string(), current + 1);\n    *current + 1\n}\n\nfn main() {\n    let mut m = HashMap::new();\n    m.insert(String::from(\"a\"), 5);\n    println!(\"{}\", bump(&mut m, \"a\"));\n    println!(\"{}\", double_bump(&mut m, \"a\"));\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "`double_bump` borrows from map immutably then mutates — classic conflict. Fix: copy the i32 first (it's Copy)."
+}

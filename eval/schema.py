@@ -29,6 +29,8 @@ class EvalTask:
     notes: str = ""
     # Optional: extra files needed for the cargo project (e.g., Cargo.toml override)
     extra_files: dict[str, str] = field(default_factory=dict)
+    # Where to write model output. Default src/main.rs; lib tasks need src/lib.rs.
+    target_file: str = "src/main.rs"
 
 
 @dataclass

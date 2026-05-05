@@ -1,0 +1,11 @@
+{
+  "id": "type_005",
+  "sub_eval": "type",
+  "task_prompt": "Fix the trait/method resolution errors. The function should return the elements that occur exactly once in the input. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "use std::collections::HashMap;\n\nfn unique_only(items: Vec<String>) -> Vec<String> {\n    let mut counts: HashMap<&String, i32> = HashMap::new();\n    for item in items {\n        *counts.entry(&item).or_insert(0) += 1;\n    }\n    counts.iter().filter(|(_, c)| **c == 1).map(|(k, _)| k.clone()).collect()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"b\"), String::from(\"a\"), String::from(\"c\")];\n    println!(\"{:?}\", unique_only(v));\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "hard",
+  "source": "hand-curated by Claude Code",
+  "notes": "`HashMap<&String, i32>` keys borrow from `item`, but `item` is moved (or borrowed as &String which doesn't live long enough). Fix: HashMap<String, i32> by ownership or restructure."
+}

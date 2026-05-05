@@ -1,0 +1,15 @@
+{
+  "id": "issue_002",
+  "sub_eval": "issue",
+  "task_prompt": "The `Stack` implementation has a bug \u2014 `pop` returns the wrong end (returns the bottom of the stack instead of the top). Fix it so the existing tests pass. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "pub struct Stack<T> {\n    items: Vec<T>,\n}\n\nimpl<T> Stack<T> {\n    pub fn new() -> Self {\n        Stack { items: Vec::new() }\n    }\n\n    pub fn push(&mut self, item: T) {\n        self.items.push(item);\n    }\n\n    pub fn pop(&mut self) -> Option<T> {\n        if self.items.is_empty() {\n            None\n        } else {\n            Some(self.items.remove(0))\n        }\n    }\n\n    pub fn len(&self) -> usize {\n        self.items.len()\n    }\n\n    pub fn is_empty(&self) -> bool {\n        self.items.is_empty()\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn lifo_order() {\n        let mut s = Stack::new();\n        s.push(1);\n        s.push(2);\n        s.push(3);\n        assert_eq!(s.pop(), Some(3));\n        assert_eq!(s.pop(), Some(2));\n        assert_eq!(s.pop(), Some(1));\n        assert_eq!(s.pop(), None);\n    }\n\n    #[test]\n    fn empty_pop() {\n        let mut s: Stack<i32> = Stack::new();\n        assert_eq!(s.pop(), None);\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Bug: pop uses remove(0) (bottom), should use Vec::pop() (top). Easy LIFO/FIFO logic fix.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "type_003",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type errors. The function should parse each string into an i32 and return the sum, defaulting to 0 if any parse fails. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn sum_strings(strs: Vec<&str>) -> i32 {\n    let mut total = 0;\n    for s in strs {\n        total += s.parse();\n    }\n    total\n}\n\nfn main() {\n    let v = vec![\"1\", \"2\", \"3\", \"oops\", \"4\"];\n    println!(\"{}\", sum_strings(v));\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "`s.parse()` returns Result; need turbofish or unwrap_or, plus type annotation."
+}
