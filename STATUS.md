@@ -1,32 +1,42 @@
 # STATUS
 
-**Last updated:** 2026-05-05 by Claude Code
+**Last updated:** 2026-05-05 evening by Claude Code
 
 ## Current state
 
-**Phase:** Pre-Phase-0 — awaiting user authorisation to begin.
-**Plan version:** v2 zero-risk, $200 budget (2026-05-05 evening revision)
+**Phase:** **Phase 0 — IN PROGRESS** (started 2026-05-05)
+**Plan version:** v2 zero-risk, $75 actual funding ($50 RunPod + $25 Together)
 
-**Pending blocker:** user must complete one-time setup (see `AUTOMATION.md` §1):
-- [ ] **RunPod account funded with $200 + API key** (was Lambda, switched to cheaper provider)
-- [ ] HuggingFace write token
-- [x] GitHub personal access token (user has stated already provided)
-- [ ] **Together AI API key** (for hosted teacher inference)
-- [ ] (Optional) Weights & Biases API key
-- [ ] Written budget authorisation in-session: "I authorise up to $200 for Tem-Rust v1"
+**Authorisation:** "just do it im lazy" — user authorised $75 total spend, 2026-05-05.
 
-Once these are in place, Phase 0 starts immediately.
+## Setup completed
+- [x] All 4 credentials saved to ~/.config/temllm/ (chmod 600)
+- [x] All 4 API keys verified working (HF/GH/Together/RunPod)
+- [x] Repo pushed to https://github.com/temm1e-labs/temrust (private, main, 6 commits)
+- [x] Python venv created at .venv/ with `requests` + `huggingface_hub`
+- [x] Project scaffold: scripts/, eval/, data/, configs/, outputs/
+- [x] Helper scripts: load_creds.sh, runpod_check.py, together_check.py
+- [x] Verified RunPod catalog: **RTX 4090 spot at $0.20/hr** is available (cheaper than A100 PCIe 80GB at $0.60/hr) — switching default to RTX 4090 for 1.7B QLoRA training
+- [x] Verified Together AI catalog: **Qwen3-1.7B is FREE** on Together; many baselines can run at $0
+
+## Cost optimisation discovered
+- Default training GPU: **RTX 4090 spot ($0.20/hr)** — was A100 40GB ($0.60/hr). 3× cheaper.
+- Free baselines on Together: Qwen3-1.7B, Qwen3-0.6B, Qwen2.5-Coder-7B-Instruct (untiered).
+- Revised expected committed: **~$15** (was $35) at $75 funded budget.
+
+## Spent so far
+$0.00 / $75.00 funded
 
 ## Progress
 
 | Phase | Status | Started | Completed | Spend |
 |---|---|---|---|---|
 | Pre-0 (planning) | ✅ Done | 2026-05-05 | 2026-05-05 | $0 |
-| 0 (foundations) | ⏸ Awaiting auth | — | — | — |
+| 0 (foundations) | 🟡 In progress | 2026-05-05 | — | $0 |
 | 1 (data) | ⏸ | — | — | — |
 | 2 (SFT v0) | ⏸ | — | — | — |
 | 3 (synthetic + SFT v1) | ⏸ | — | — | — |
-| 4 (GRPO, optional) | ⏸ | — | — | — |
+| 4 (GRPO) | ⏸ SKIPPED (zero-risk) | — | — | — |
 | 5 (ship) | ⏸ | — | — | — |
 
 ## Key decisions locked
@@ -46,6 +56,14 @@ See `PLAN.md` for full plan.
 
 - Final landing page domain (default: GitHub Pages)
 - TEMM1E integration: separate model or same? (decision deferred to Phase 5)
+
+## Next action (immediate)
+
+1. Build TemRust-Issue eval task harness — schema, runner, scorer
+2. Curate first 5 TemRust-Issue tasks manually (smoke-test the format)
+3. Run baseline: Qwen3-1.7B-Instruct via Together AI free tier on those 5 tasks (cost: $0)
+4. If end-to-end passes: scale up to 50 tasks per sub-eval, 5 sub-evals
+5. Then run baselines on all 9 candidate models
 
 ## Next action when "Continue Tem-Rust" is invoked
 

@@ -58,3 +58,6 @@ Thumbs.db
 local_notes/
 scratch/
 secrets/
+.venv/
+.env
+*.env

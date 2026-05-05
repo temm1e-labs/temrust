@@ -1,0 +1,38 @@
+# Core ML / training (Phase 1+)
+unsloth>=2026.5
+axolotl>=0.29
+trl>=0.13
+transformers>=4.50
+datasets>=3.0
+accelerate>=1.4
+peft>=0.14
+bitsandbytes>=0.43
+
+# Inference
+vllm>=0.7
+sglang>=0.4
+
+# Data pipeline
+PyGithub>=2.5
+tree-sitter>=0.23
+tree-sitter-rust>=0.23
+beautifulsoup4>=4.12
+markdownify>=0.14
+
+# API clients
+huggingface_hub>=0.27
+together>=1.4
+runpod>=1.7
+openai>=1.60  # for Together AI OpenAI-compatible endpoints
+
+# Eval
+lm-eval>=0.4
+pytest>=8.0
+docker>=7.1
+
+# Utilities
+python-dotenv>=1.0
+tqdm>=4.67
+wandb>=0.19
+pyyaml>=6.0
+jsonlines>=4.0
