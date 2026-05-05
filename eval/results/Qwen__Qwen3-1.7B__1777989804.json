@@ -1,0 +1,42 @@
+{
+  "model": "Qwen/Qwen3-1.7B",
+  "provider": "together",
+  "n_tasks": 3,
+  "n_passed": 0,
+  "pass_rate": 0.0,
+  "results": [
+    {
+      "task_id": "borrow_001",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "passed": false,
+      "error_msg": "inference: Together API HTTP 400: {\n  \"id\": \"ohssVEw-2kFHot-9f7049cba90309d8\",\n  \"error\": {\n    \"message\": \"Unable to access non-serverless model Qwen/Qwen3-1.7B. Please visit https://api.together.ai/models/Qwen/Qwen3-1.7B to create and start a new dedicated endpoint for the model.\",\n    \"type\": \"invalid_request_error\",\n    \"param\":",
+      "raw_output": "",
+      "extracted_patch": "",
+      "verifier_stdout": "",
+      "verifier_stderr": "",
+      "duration_seconds": 1.083528995513916
+    },
+    {
+      "task_id": "borrow_002",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "passed": false,
+      "error_msg": "inference: Together API HTTP 400: {\n  \"id\": \"ohssVW5-2kFHot-9f7049d25b2228ee\",\n  \"error\": {\n    \"message\": \"Unable to access non-serverless model Qwen/Qwen3-1.7B. Please visit https://api.together.ai/models/Qwen/Qwen3-1.7B to create and start a new dedicated endpoint for the model.\",\n    \"type\": \"invalid_request_error\",\n    \"param\":",
+      "raw_output": "",
+      "extracted_patch": "",
+      "verifier_stdout": "",
+      "verifier_stderr": "",
+      "duration_seconds": 0.35350608825683594
+    },
+    {
+      "task_id": "type_001",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "passed": false,
+      "error_msg": "inference: Together API HTTP 400: {\n  \"id\": \"ohssVd6-2kFHot-9f7049d49930b6a3\",\n  \"error\": {\n    \"message\": \"Unable to access non-serverless model Qwen/Qwen3-1.7B. Please visit https://api.together.ai/models/Qwen/Qwen3-1.7B to create and start a new dedicated endpoint for the model.\",\n    \"type\": \"invalid_request_error\",\n    \"param\":",
+      "raw_output": "",
+      "extracted_patch": "",
+      "verifier_stdout": "",
+      "verifier_stderr": "",
+      "duration_seconds": 0.44108009338378906
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "borrow_001",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow checker error in this Rust code. The function should compile cleanly and the original logic (printing each name) should be preserved. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn main() {\n    let names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = names[0];\n    for name in names {\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Move-vs-borrow basics: indexing with `[0]` moves a String out of the vec, then iterating consumes the vec. Fix is `&names[0]` clone or borrow + `&names` in for loop, etc."
+}

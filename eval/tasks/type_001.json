@@ -1,0 +1,11 @@
+{
+  "id": "type_001",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type error in this Rust code. The fixed version should compute the average of the numbers and print it. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn main() {\n    let nums: Vec<i32> = vec![1, 2, 3, 4, 5];\n    let total: i32 = nums.iter().sum();\n    let avg = total / nums.len();\n    println!(\"avg = {}\", avg);\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "`nums.len()` returns `usize`, `total` is `i32`. Mismatched types. Cast or convert."
+}

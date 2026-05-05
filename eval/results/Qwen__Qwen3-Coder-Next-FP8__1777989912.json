@@ -1,0 +1,42 @@
+{
+  "model": "Qwen/Qwen3-Coder-Next-FP8",
+  "provider": "together",
+  "n_tasks": 3,
+  "n_passed": 3,
+  "pass_rate": 1.0,
+  "results": [
+    {
+      "task_id": "borrow_001",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn main() {\n    let names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = names[0].clone();\n    for name in &names {\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}\n```",
+      "extracted_patch": "fn main() {\n    let names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = names[0].clone();\n    for name in &names {\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_jzr9adgj)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.50s\n",
+      "duration_seconds": 3.519294023513794
+    },
+    {
+      "task_id": "borrow_002",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "Looking at this code, I see the borrow-checker error. The issue is that `longest` is trying to hold a reference to an element in the `items` vector, but when we iterate over `items` with `for item in items`, we're taking ownership of each element (consuming the vector). This creates a problem because:\n\n1. We're trying to store a reference to an element that might be moved out\n2. The loop variable `item` is owned, so `&item` creates a reference to a local variable that goes out of scope\n\nThe fix is to iterate by reference instead of by value, so we don't consume the vector and can safely take references to its elements.\n\n```rust\nfn longest_len(items: Vec<String>) -> usize {\n    if items.is_empty() {\n        return 0;\n    }\n    \n    let mut longest = &items[0];\n    for item in &items {\n        if item.len() > longest.len() {\n            longest = item;\n        }\n    }\n    longest.len()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}\n```",
+      "extracted_patch": "fn longest_len(items: Vec<String>) -> usize {\n    if items.is_empty() {\n        return 0;\n    }\n    \n    let mut longest = &items[0];\n    for item in &items {\n        if item.len() > longest.len() {\n            longest = item;\n        }\n    }\n    longest.len()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_ol3dtwj4)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 2.651799201965332
+    },
+    {
+      "task_id": "type_001",
+      "model_id": "Qwen/Qwen3-Coder-Next-FP8",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn main() {\n    let nums: Vec<i32> = vec![1, 2, 3, 4, 5];\n    let total: i32 = nums.iter().sum();\n    let avg = total as f64 / nums.len() as f64;\n    println!(\"avg = {}\", avg);\n}\n```",
+      "extracted_patch": "fn main() {\n    let nums: Vec<i32> = vec![1, 2, 3, 4, 5];\n    let total: i32 = nums.iter().sum();\n    let avg = total as f64 / nums.len() as f64;\n    println!(\"avg = {}\", avg);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_tafalekm)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 1.789186954498291
+    }
+  ]
+}

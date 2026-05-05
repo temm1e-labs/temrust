@@ -1,0 +1,42 @@
+{
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct-Turbo",
+  "provider": "together",
+  "n_tasks": 3,
+  "n_passed": 0,
+  "pass_rate": 0.0,
+  "results": [
+    {
+      "task_id": "borrow_001",
+      "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct-Turbo",
+      "passed": false,
+      "error_msg": "inference: Together API HTTP 404: {\n  \"id\": \"ohssqRA-2kFHot-9f704b73cac9b1bf\",\n  \"error\": {\n    \"message\": \"Unable to access model Qwen/Qwen2.5-Coder-7B-Instruct-Turbo. Please visit https://api.together.ai/models to view the list of supported models.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": \"model_not_av",
+      "raw_output": "",
+      "extracted_patch": "",
+      "verifier_stdout": "",
+      "verifier_stderr": "",
+      "duration_seconds": 0.5663211345672607
+    },
+    {
+      "task_id": "borrow_002",
+      "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct-Turbo",
+      "passed": false,
+      "error_msg": "inference: Together API HTTP 404: {\n  \"id\": \"ohssqXK-2kFHot-9f704b773d2684f1\",\n  \"error\": {\n    \"message\": \"Unable to access model Qwen/Qwen2.5-Coder-7B-Instruct-Turbo. Please visit https://api.together.ai/models to view the list of supported models.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": \"model_not_av",
+      "raw_output": "",
+      "extracted_patch": "",
+      "verifier_stdout": "",
+      "verifier_stderr": "",
+      "duration_seconds": 0.371319055557251
+    },
+    {
+      "task_id": "type_001",
+      "model_id": "Qwen/Qwen2.5-Coder-7B-Instruct-Turbo",
+      "passed": false,
+      "error_msg": "inference: Together API HTTP 404: {\n  \"id\": \"ohssqew-2kFHot-9f704b79aa1d850a\",\n  \"error\": {\n    \"message\": \"Unable to access model Qwen/Qwen2.5-Coder-7B-Instruct-Turbo. Please visit https://api.together.ai/models to view the list of supported models.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": \"model_not_av",
+      "raw_output": "",
+      "extracted_patch": "",
+      "verifier_stdout": "",
+      "verifier_stderr": "",
+      "duration_seconds": 0.4164149761199951
+    }
+  ]
+}

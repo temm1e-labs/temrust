@@ -1,0 +1,11 @@
+{
+  "id": "borrow_002",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow-checker error in this Rust function. The fixed version must compile and preserve the same observable behaviour: read the longest string from `items` and return its length. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn longest_len(items: Vec<String>) -> usize {\n    let mut longest = &items[0];\n    for item in items {\n        if item.len() > longest.len() {\n            longest = &item;\n        }\n    }\n    longest.len()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Iterating consumes the vec; can't borrow from items inside the loop while moving them. Idiomatic fix: take `&[String]` parameter, iterate by reference."
+}

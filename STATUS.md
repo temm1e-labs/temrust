@@ -15,17 +15,27 @@
 - [x] Repo pushed to https://github.com/temm1e-labs/temrust (private, main, 6 commits)
 - [x] Python venv created at .venv/ with `requests` + `huggingface_hub`
 - [x] Project scaffold: scripts/, eval/, data/, configs/, outputs/
-- [x] Helper scripts: load_creds.sh, runpod_check.py, together_check.py
-- [x] Verified RunPod catalog: **RTX 4090 spot at $0.20/hr** is available (cheaper than A100 PCIe 80GB at $0.60/hr) — switching default to RTX 4090 for 1.7B QLoRA training
-- [x] Verified Together AI catalog: **Qwen3-1.7B is FREE** on Together; many baselines can run at $0
+- [x] Helper scripts: load_creds.sh, runpod_check.py, together_check.py, together_serverless.py
+- [x] Verified RunPod catalog: **RTX 4090 spot at $0.20/hr** is the cheapest reliable option for 1.7B QLoRA — 3× cheaper than A100 PCIe 80GB at $0.60/hr.
+- [x] Verified Together AI serverless reality: only some catalog entries are actually serverless. **Qwen3-Coder-Next-FP8 IS serverless** ($0.50 in / $1.20 out per Mtok) — teacher pipeline confirmed.
+- [x] **END-TO-END EVAL HARNESS WORKS** (2026-05-05). 3/3 hand-curated tasks pass on Qwen3-Coder-Next-FP8 via Together API.
+
+## Verified serverless on Together (live tested)
+- ✅ `Qwen/Qwen3-Coder-Next-FP8` ($0.50 in / $1.20 out per Mtok) — **planned teacher**
+- ✅ `deepseek-ai/DeepSeek-V3.1` ($0.60 / $1.70 per Mtok) — teacher backup, strong baseline
+- ❌ Qwen2.5-Coder-* / Llama-3.1-Turbo / DSR1-Distill-1.5B — **non-serverless** (require dedicated endpoints)
+
+## Implication for Phase 0 baselines
+Bases like Qwen3-1.7B-Base and Qwen2.5-Coder-1.5B are **non-serverless** on Together — must run locally on Mac via llama.cpp/Ollama OR rent a RunPod GPU. Plan: download GGUFs to Mac, baseline locally for free.
 
 ## Cost optimisation discovered
 - Default training GPU: **RTX 4090 spot ($0.20/hr)** — was A100 40GB ($0.60/hr). 3× cheaper.
-- Free baselines on Together: Qwen3-1.7B, Qwen3-0.6B, Qwen2.5-Coder-7B-Instruct (untiered).
+- Bases run locally on Mac (free) via llama.cpp/Ollama for Phase 0 baselines.
+- Teacher = Qwen3-Coder-Next-FP8 on Together AI ($0.50/$1.20 per Mtok) — confirmed serverless.
 - Revised expected committed: **~$15** (was $35) at $75 funded budget.
 
 ## Spent so far
-$0.00 / $75.00 funded
+$0.005 / $75.00 funded (smoke-test eval on Qwen3-Coder-Next-FP8, 3 tasks, ~6K tokens)
 
 ## Progress
 
