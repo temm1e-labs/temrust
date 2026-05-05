@@ -1,35 +1,37 @@
 # TemLLM
 
-A research project to interrogate, challenge, and (if it survives) prototype a thesis:
+**Goal:** ship the **best open coding agent at its parameter size**.
 
-> **Train a small LLM only on high-IQ material — math, science, philosophy, top-tier engineering and literature — and it will outreason a generalist 10–20× its size.**
+Concretely: a 7B dense post-trained model that matches **DeepSWE-Preview-32B on SWE-bench Verified**, places **top-3 open at ≤7B on SWE-bench Pro**, and generalises on a **private post-cutoff GitHub-issue holdout**. Stretch: a 4B distillation that retains ≥80% of the 7B's score and runs on-device.
 
-This repo opens with **research before code**. The goal of v0 is to know the shape of the prior art, the strongest counter-arguments, and the realistic feasibility envelope before a single token of compute is spent.
-
----
-
-## How to read this repo
-
-Read in this order:
-
-1. **[THEORY.md](./THEORY.md)** — the thesis as the originator stated it, captured faithfully.
-2. **[PRIOR_ART.md](./PRIOR_ART.md)** — what has already been built and published in this direction. Phi series, DeepSeek-Math, Llemma, Minerva, rStar-Math, FineWeb-Edu, the lot.
-3. **[CHALLENGE.md](./CHALLENGE.md)** — the strongest counter-evidence. Where the thesis breaks, with citations.
-4. **[FEASIBILITY.md](./FEASIBILITY.md)** — concrete paths from "do nothing" to "pretrain from scratch", with costs.
-5. **[OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md)** — what we have to decide before any compute is spent.
+The project pivoted on 2026-05-05 from the original "small model trained on high-IQ canon" thesis after research found:
+- The strict thesis (4B beats 80B in general intelligence) is **benchmark-fit, not utility** — see `CHALLENGE.md`
+- "Best agent for its size" is a **specific, measurable, defensible** target — see `PLAN.md`
+- The proven recipe (R2E-Gym + GRPO + verifier-driven distillation) is **achievable on a $25–65K budget over 6 months**
 
 ---
 
-## Current verdict (one paragraph)
+## Read in this order
 
-The thesis is **partially validated and partially wrong**, and the difference matters. The "small + curated > large + raw" idea has been the explicit research program of Microsoft (Phi), DeepSeek, Alibaba (Qwen-Math), Microsoft Research Asia (rStar-Math), and EleutherAI (Llemma) for ~3 years. They have produced 3–14B models that beat 70B+ generalists on **verifiable-reasoning** benchmarks (math, code, formal proof). They have **not** produced 4B models that beat 80B generalists on open-ended utility — knowledge recall, agent tasks, conversation, long-context coding. Phi-4 (14B, Dec 2024) scores 84.8 MMLU and 80.4 MATH but only **3** on SimpleQA where Llama-3-70B scores ~20. The "smarter than 80B" slogan is real on a narrow axis and false on a wide one. This is the design problem TemLLM has to confront.
+1. **[PLAN.md](./PLAN.md)** ← the locked project plan. Start here.
+2. **[OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md)** — Q1–Q5 answered, Q6–Q10 still need decisions.
+3. **[THEORY.md](./THEORY.md)** — the original thesis, captured verbatim, then unpacked.
+4. **[CHALLENGE.md](./CHALLENGE.md)** — why the strict thesis was wrong, with citations.
+5. **[PRIOR_ART.md](./PRIOR_ART.md)** — the small-curated-LLM landscape (Phi, DeepSeek-Math, Qwen-Math, rStar-Math). Context, not directly applicable to the new direction.
+6. **[FEASIBILITY.md](./FEASIBILITY.md)** — generic small-model feasibility. The agent-specific paths in `PLAN.md` supersede this for the current project.
 
-The next decision is **scope**: which axis of "smart" do we actually want?
+When two docs disagree, `PLAN.md` wins.
 
 ---
 
 ## Status
 
-- Phase: **research / scoping**. No training code, no models.
-- Created: 2026-05-05.
-- Owner: Quan Duong (mini.illidan@gmail.com).
+- Phase: **Phase 0 — Foundations** (eval harness, baselines, GPU procurement)
+- Owner: Quan Duong (mini.illidan@gmail.com)
+- Created: 2026-05-05
+- Pivoted to agentic-coding focus: 2026-05-05
+- No training code yet; eval first, baselines next.
+
+## Win condition (one-line summary)
+
+> A 7B dense open model that resolves real GitHub issues at 32B-class quality on a private, contamination-resistant holdout — published with weights, recipe, and technical report.
