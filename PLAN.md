@@ -8,11 +8,14 @@
 
 Ship **Tem-Rust-1.7B**, a 1.7B Rust coding specialist. By end of project:
 
-1. **TemRust-Issue ≥ 35%** (real GitHub Rust issues, post-cutoff, manually curated, `cargo test` verifier)
-2. **TemRust-Borrow ≥ 60%** + **TemRust-Type ≥ 60%** + **TemRust-Clippy ≥ 50%** + **TemRust-Test ≥ 50%**
+1. **TemRust-Issue ≥ 25%** (real GitHub Rust issues, post-cutoff, manually curated, `cargo test` verifier) — calibrated against Strand-Rust-Coder-14B's 43-48% on Rust benchmarks (60% relative at 12% of params is honest)
+2. **TemRust-Borrow ≥ 60%** + **TemRust-Type ≥ 60%** + **TemRust-Test ≥ 50%** (Clippy deferred to v1.1)
 3. **Run at ≥ 30 tok/s on M3 Pro at int4** (Q4_K_M GGUF)
 4. **Cleanly outperforms Qwen2.5-Coder-1.5B-Instruct** on TemRust-* by ≥ 10 pts on every sub-eval
-5. **Within 5 pts of Qwen2.5-Coder-7B-Instruct** on at least 3 of 5 sub-evals (the "1.7B fights 7B" surprise)
+5. **MultiPL-E Rust ≥ Qwen2.5-Coder-3B-Instruct's score** (the "1.7B beats 3B" public-benchmark headline)
+6. **RustEvo² + Aider Polyglot Rust slice** scored alongside (credibility, not gating)
+
+**Stretch:** within 5 pts of Qwen2.5-Coder-7B-Instruct on at least 3 of 5 sub-evals; within 10 pts of Strand-Rust-Coder-14B on Rust-specific tasks at 12% of its params.
 
 **Shipped artifacts:**
 - HuggingFace: `tem-llm/tem-rust-1.7b` (Apache-2.0 weights + GGUF quants)
@@ -64,18 +67,21 @@ Ship **Tem-Rust-1.7B**, a 1.7B Rust coding specialist. By end of project:
 
 ## §3. Data Strategy
 
-Five sources, all `cargo`-verifiable.
+Mix existing high-quality datasets with our cargo-verified sources.
 
-| Source | Target | Verifier |
-|---|---|---|
-| Real GitHub Rust issues (issue → fix-PR with added test) | 3,000 | `cargo test` |
-| Synthetic compiler-error fixes | 2,000 | `cargo check` |
-| Test generation pairs from well-tested crates | 1,500 | `cargo test` |
-| Clippy idiomatic refactors | 1,000 | `cargo clippy -- -D warnings` |
-| Phase-2 self-distillation on post-cutoff issues | 2,000 | `cargo test` |
-| **Total target** | **~9,500** | |
+| Source | Target | Type | Why |
+|---|---|---|---|
+| **Fortytwo-Network/Strandset-Rust-v1** | sample 30K of 191K | external | Strand's open-released training set; 15 task categories, peer-ranked. Saves us most of Phase 1 work. |
+| The Stack v2 (Rust subset, permissive-licensed) | 5K filtered | external | Pretraining-grade Rust source code; for code-style priors |
+| Real GitHub Rust issues (issue → fix-PR with added test) | 2,000 | ours | `cargo test` verified |
+| Synthetic compiler-error fixes | 1,500 | ours | `cargo check` verified |
+| Test generation pairs from well-tested crates | 1,000 | ours | `cargo test` verified |
+| Clippy idiomatic refactors | 500 | ours | `cargo clippy -- -D warnings` verified |
+| **Total post-dedup target** | **~25-35K** | | After dedup + decontamination |
 
-After dedup + decontamination against eval suite: **~7-8K usable**.
+**Key change:** instead of building 9.5K from scratch, we **start from the Strandset (proven) and layer our cargo-verified additions on top**. This dramatically reduces Phase 1 work and time. If Strandset is unsuitable on inspection, fall back to the original 5-source plan.
+
+**Edit format (CRITICAL for small models):** structure-aware function-block diffs via tree-sitter-rust, NOT raw search/replace, NOT full-file rewrite. Per [Diff-XYZ](https://arxiv.org/html/2510.12487v1) and [AdaEdit](https://arxiv.org/html/2604.27296), this is worth +8-10 pts at 1.7B.
 
 Pipeline:
 1. Local crawler pulls from top ~500 Rust repos (stars > 100, has tests, recently active)
@@ -88,18 +94,29 @@ Pipeline:
 
 ---
 
-## §4. Eval Suite (we own this)
+## §4. Eval Suite
+
+**Owned (the moat):**
 
 | Sub-eval | Tasks | Verifier |
 |---|---|---|
 | TemRust-Borrow | 50 | `cargo check` |
 | TemRust-Type | 50 | `cargo check` |
 | TemRust-Test | 50 | `cargo test` |
-| TemRust-Clippy | 50 | `cargo clippy -- -D warnings` |
 | TemRust-Issue | 50 (real, post-cutoff) | repo-specific tests |
-| **Total** | **250** | |
+| **Owned total** | **200** | |
 
-Hand-curated. Held back from training. Released publicly alongside the model. Becomes the de-facto Rust-LLM benchmark.
+Hand-curated. Held back from training. Released publicly alongside the model.
+
+**Standard public benchmarks (run for credibility, not gating):**
+
+| Benchmark | Source | Why |
+|---|---|---|
+| MultiPL-E Rust | [nuprl/MultiPL-E](https://github.com/nuprl/MultiPL-E) | HumanEval extended to Rust; the standard polyglot eval |
+| RustEvo² | [SYSUSELab/RustEvo](https://github.com/SYSUSELab/RustEvo) | 588 Rust API evolution tasks (Rust 1.71→1.84) |
+| Aider Polyglot Rust slice | [aider.chat/leaderboards](https://aider.chat/docs/leaderboards/) | ~37 Rust Exercism exercises |
+
+These cost ~$5 total to run on our model; published on launch alongside TemRust-*.
 
 ---
 
@@ -183,24 +200,37 @@ Claude Code is the executor. See `AUTOMATION.md` for the protocol.
 
 ---
 
-## §7. Risks & Mitigations
+## §7. Competitive Landscape (May 2026)
+
+| Model | Params | Score | License | Position |
+|---|---|---|---|---|
+| Strand-Rust-Coder-14B-v1 | 14B | 43-48% Rust bench | Apache-2.0 | **Server-class Rust specialist** (Fortytwo Network) |
+| Tessa-Rust-T1-7B | 7B | unclear, basic completion | varies | Earlier 7B attempt |
+| Qwen3-Coder-Next | 80B/3B-active MoE | top open agentic | Apache-2.0 | General coder, MoE architecture |
+| GPT-5.1 / Claude / Gemini 3 | frontier | 88% Aider Polyglot | closed | Strong Rust but expensive at scale |
+| **Tem-Rust-1.7B** (us) | **1.7B** | **target ≥ 25% Rust bench** | **Apache-2.0** | **The on-device Rust specialist** |
+
+The ≤ 2B Rust specialist niche is empty. Strand and Tessa serve different deployment targets (server-class). Our positioning: *"What Strand does at 14B server-class, Tem does at 1.7B on your laptop, offline, free."*
+
+## §8. Risks & Mitigations
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Qwen3-1.7B-Base not released as bare base (only -Instruct or -Thinking) | Med | Med | Fallback to Qwen2.5-Coder-1.5B-Base verified Phase 0 |
-| Data corpus < 5K after filter | Med | High | Backstop: synthetic-only training; widen Source 2-4 targets |
-| Teacher quality insufficient for synthetic data | Med | Med | Try multiple teachers; quality gate ≥ 50% test-pass before bulk run |
-| GRPO unstable at 1.7B | Med | Low | Skip Phase 4 if v1 hits bar; ship v1 |
-| 1.7B too small for tool-use chains | Med | High | Phase 0 baselines tell us early; if base fails 5% on Issue, escalate to 3B |
-| Cloud GPU price changes | Low | Low | Use vast.ai or RunPod fallback; rebudget if >2x change |
+| Strandset-Rust-v1 quality unsuitable on inspection | Low | Med | Fallback: original 5-source plan; cost negligible |
+| Qwen3-1.7B-Base mismatch with code tasks | Low | Med | Phase 0 also baselines Qwen3.5-2B-Base + Qwen2.5-Coder-1.5B-Base |
+| Edit format choice wrong for our model | Med | Med | Phase 2 ablates 2 formats: function-block diff vs unified diff |
+| Teacher quality insufficient | Med | Med | Quality gate ≥ 50% test-pass before bulk run; switch to DSR1-Distill-14B |
+| 1.7B too small for tool-use chains | Med | High | Phase 0 baselines tell us early; if base fails 5% on Issue, escalate to Qwen3.5-2B |
+| Frontier model adoption kills market | Low | Med | Local + free + private + sub-second is the moat — frontier costs $$$ at scale |
+| Strand ships 1.5B variant during our run | Low-Med | High | Time-box 8 weeks; first-mover; integrate into TEMM1E for distribution |
+| Cloud GPU price changes | Low | Low | Use vast.ai fallback; rebudget if >2× change |
 | Claude Code session limits break long runs | High | Low | Cloud jobs run unattended; we poll, not stream |
-| User loses Lambda API credentials | Low | Med | Document recovery in AUTOMATION.md |
-| Budget overrun | Med | High | Per-phase hard caps; >$50 single transaction needs auth |
-| No-one cares about a small Rust model | Med | Med | Mitigate via demo quality + r/rust post + integration with TEMM1E |
+| Budget overrun | Med | High | Per-phase hard caps; >$30 single transaction needs auth |
+| No-one downloads | Med | Med | Demo + r/rust + benchmark release + TEMM1E integration as distribution channels |
 
 ---
 
-## §8. Decision Log
+## §9. Decision Log
 
 | Date | Decision | Why |
 |---|---|---|
@@ -209,16 +239,19 @@ Claude Code is the executor. See `AUTOMATION.md` for the protocol.
 | 2026-05-05 | Pivot 3: research → product | Owner wants something people use, not A/B |
 | 2026-05-05 | Pivot 4: generic → Rust specialist | Niche uncontested; cargo = perfect verifier; aligns with TEMM1E |
 | 2026-05-05 | Distribution: HF + crates.io + r/rust | Rust-native distribution channels |
-| 2026-05-05 | Eval: build TemRust-* (200 tasks, cargo-verified) | Own the benchmark = own the moat |
+| 2026-05-05 | Eval: build TemRust-* (200 tasks, cargo-verified) + run MultiPL-E + RustEvo² + Aider Polyglot Rust | Own the moat + credibility |
 | 2026-05-05 | **Pivot 5: $500 → $200 zero-risk** | User-set tighter budget; risk reduction priority |
 | 2026-05-05 | Skip Phase 4 (GRPO) | Highest single failure mode at 1.7B |
 | 2026-05-05 | Switch to RunPod A100 40GB ($0.60/hr) from Lambda ($1.49/hr) | 60% cost reduction; sufficient VRAM |
 | 2026-05-05 | Teacher: Qwen3-Coder-Next via Together AI hosted | Best open coding teacher; per-token pricing |
-| 2026-05-05 | Reduce eval to 200 tasks; seq length to 4K | Speed up runs without losing quality |
+| 2026-05-05 | Reduce seq length to 4K | Most Rust files fit; ~30% faster training |
+| 2026-05-05 | **Use Fortytwo Strandset-Rust-v1 as primary data source** (191K open-released) | Proven recipe from Strand-Rust-Coder-14B; saves Phase 1 work |
+| 2026-05-05 | **Edit format: structure-aware function-block diffs** via tree-sitter-rust | Critical for small models per Diff-XYZ / AdaEdit; worth +8-10 pts |
+| 2026-05-05 | Position: "what Strand does at 14B server, Tem does at 1.7B on-device" | Strand-Rust-Coder-14B exists; 7B Tessa exists; ≤2B niche still uncontested |
 
 ---
 
-## §9. Next Action
+## §10. Next Action
 
 1. User authorises **$200** budget + provides RunPod + HF + GitHub credentials
 2. I provision RunPod A100 40GB, run Phase 0 baselines on Qwen3-1.7B-Base + Qwen3.5-2B-Base + Qwen2.5-Coder-1.5B-Base, build eval harness

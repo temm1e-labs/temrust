@@ -132,6 +132,19 @@ The $165–186 reserve covers: re-runs after bugs, re-launching preempted spot i
 
 ---
 
+## Free Credit Opportunities (could extend or replace budget)
+
+| Source | Amount | Friction | Recommended? |
+|---|---|---|---|
+| **Modal** | $30/month free perpetually | Sign up | YES — covers most teacher inference |
+| **Together AI signup credit** | $5-25 one-time | Sign up | YES — already in plan |
+| **Anthropic AI for Science** | Up to $20K Claude credits, 6-month | Application required, ~2 weeks | Worth applying |
+| **AWS Activate** | Up to $100K | Requires entity (LLC/corp) | Worth if user has entity |
+| **Google Cloud Startup Perks** | Up to $350K | Requires startup status | Worth if user has entity |
+| **Vercel AI Accelerator** | $25K AWS + $15K Anthropic + $5K Modal | Cohort application | Long shot |
+
+**Realistic stack for solo dev without entity:** Modal $30/mo + Together signup ~$15 = effectively covers all our compute. The user's actual cash spend could be $0-10 if these are utilised.
+
 ## Cost Reduction Levers (already applied vs prior plan)
 
 | Lever | Saving |

@@ -75,17 +75,21 @@ Script: `scripts/clippy_pairs.py`
 ### 1f. Format + decontaminate + mix
 
 Script: `scripts/build_sft_dataset.py`
+- **Pull `Fortytwo-Network/Strandset-Rust-v1`** (191K examples) and sample/filter ~30K representative
+- Pull The Stack v2 Rust permissive subset (~5K filtered files for code-style priors)
 - Convert all sources to chat format with system prompt:
   ```
   System: You are Tem-Rust, a Rust coding assistant. Use cargo to verify your work.
+  Output edits as function-block diffs in tree-sitter-rust syntax.
   User: <task description + relevant code>
-  Assistant: <reasoning + diff/code/test>
+  Assistant: <reasoning + structure-aware diff>
   ```
-- Decontaminate against `eval/temrust_*.jsonl` via:
+- **Edit format: structure-aware function-block diffs** (per Diff-XYZ / AdaEdit research, +8-10 pts at small scale). Use tree-sitter-rust to identify function/impl boundaries; emit deltas at that granularity, not raw search/replace.
+- Decontaminate against `eval/temrust_*.jsonl` AND public benchmarks (MultiPL-E Rust, RustEvo², Aider Polyglot Rust) via:
   - Exact issue-ID match (drop)
   - Repo-level match for held-out repos (drop)
   - Embedding similarity > 0.92 (manual review)
-- Mix per-source quotas: 30% issues, 25% compile errors, 20% test pairs, 15% clippy, 10% reserved for synthetic
+- Mix per-source quotas: 50% Strandset, 15% issues, 15% compile errors, 10% test pairs, 10% other
 - Output: `data/sft_v0.jsonl` and after Phase 3, `data/sft_v1.jsonl`
 
 ---
@@ -128,14 +132,22 @@ Script: `eval/run.py`
 for model in \
   Qwen/Qwen3-1.7B-Base \
   Qwen/Qwen3-1.7B-Instruct \
+  Qwen/Qwen3.5-2B-Base \
+  Qwen/Qwen2.5-Coder-1.5B-Base \
   Qwen/Qwen2.5-Coder-1.5B-Instruct \
   Qwen/Qwen2.5-Coder-3B-Instruct \
   Qwen/Qwen2.5-Coder-7B-Instruct \
+  Fortytwo-Network/Strand-Rust-Coder-14B-v1 \
   deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B; do
   python eval/run.py --model $model --eval all
+  python eval/run.py --model $model --eval multipl_e_rust
+  python eval/run.py --model $model --eval rust_evo
+  python eval/run.py --model $model --eval aider_polyglot_rust
 done
 python eval/aggregate.py > BASELINES.md
 ```
+
+Strand-Rust-Coder-14B is included as the **upper bound reference** — we expect to land between Qwen2.5-Coder-3B-Instruct and Strand-14B at 1.7B params.
 
 ---
 
