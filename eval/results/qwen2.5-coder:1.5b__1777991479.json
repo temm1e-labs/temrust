@@ -1,0 +1,251 @@
+{
+  "model": "qwen2.5-coder:1.5b",
+  "provider": "ollama",
+  "n_tasks": 22,
+  "n_passed": 12,
+  "pass_rate": 0.5454545454545454,
+  "results": [
+    {
+      "task_id": "borrow_001",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn main() {\n    let names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = names[0].clone();\n    for name in names {\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}\n```",
+      "extracted_patch": "fn main() {\n    let names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"carol\")];\n    let first = names[0].clone();\n    for name in names {\n        println!(\"{}\", name);\n    }\n    println!(\"first was: {}\", first);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_1kk1804s)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.75s\n",
+      "duration_seconds": 4.658283948898315
+    },
+    {
+      "task_id": "borrow_002",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\nfn longest_len(items: Vec<String>) -> usize {\n    let mut longest = &items[0];\n    for item in items {\n        if item.len() > longest.len() {\n            longest = &item;\n        }\n    }\n    longest.len()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}\n```",
+      "extracted_patch": "fn longest_len(items: Vec<String>) -> usize {\n    let mut longest = &items[0];\n    for item in items {\n        if item.len() > longest.len() {\n            longest = &item;\n        }\n    }\n    longest.len()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"bb\"), String::from(\"ccc\")];\n    println!(\"{}\", longest_len(v));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_x9nbmobj)\nerror[E0505]: cannot move out of `items` because it is borrowed\n --> src/main.rs:3:17\n  |\n1 | fn longest_len(items: Vec<String>) -> usize {\n  |                ----- binding `items` declared here\n2 |     let mut longest = &items[0];\n  |                        ----- borrow of `items` occurs here\n3 |     for item in items {\n  |                 ^^^^^ move out of `items` occurs here\n4 |         if item.len() > longest.len() {\n  |                         ------- borrow later used here\n  |\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n2 |     let mut longest = &items.clone()[0];\n  |                             ++++++++\n\nerror[E0597]: `item` does not live long enough\n --> src/main.rs:5:23\n  |\n3 |     for item in items {\n  |         ---- binding `item` declared here\n4 |         if item.len() > longest.len() {\n  |                         ------- borrow later used here\n5 |             longest = &item;\n  |                       ^^^^^ borrowed value does not live long enough\n6 |         }\n7 |     }\n  |     - `item` dropped here while still borrowed\n\nSome errors have detailed explanations: E0505, E0597.\nFor more information about an error, try `rustc --explain E0505`.\nerror: could not compile `temrust_eval` (bin \"temrust_eval\") due to 2 previous errors\n",
+      "duration_seconds": 1.8318679332733154
+    },
+    {
+      "task_id": "borrow_003",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\nfn prefix_all(prefix: String, items: Vec<String>) -> Vec<String> {\n    let mut out = Vec::new();\n    for item in items {\n        let combined = prefix + &item;\n        out.push(combined);\n    }\n    out\n}\n\nfn main() {\n    let v = vec![String::from(\"alice\"), String::from(\"bob\")];\n    for s in prefix_all(String::from(\"hi \"), v) {\n        println!(\"{}\", s);\n    }\n}\n```",
+      "extracted_patch": "fn prefix_all(prefix: String, items: Vec<String>) -> Vec<String> {\n    let mut out = Vec::new();\n    for item in items {\n        let combined = prefix + &item;\n        out.push(combined);\n    }\n    out\n}\n\nfn main() {\n    let v = vec![String::from(\"alice\"), String::from(\"bob\")];\n    for s in prefix_all(String::from(\"hi \"), v) {\n        println!(\"{}\", s);\n    }\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_g45aet42)\nerror[E0382]: use of moved value: `prefix`\n --> src/main.rs:4:24\n  |\n1 | fn prefix_all(prefix: String, items: Vec<String>) -> Vec<String> {\n  |               ------ move occurs because `prefix` has type `String`, which does not implement the `Copy` trait\n2 |     let mut out = Vec::new();\n3 |     for item in items {\n  |     ----------------- inside of this loop\n4 |         let combined = prefix + &item;\n  |                        ^^^^^^ value moved here, in previous iteration of loop\n  |\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n4 |         let combined = prefix.clone() + &item;\n  |                              ++++++++\n\nFor more information about this error, try `rustc --explain E0382`.\nerror: could not compile `temrust_eval` (bin \"temrust_eval\") due to 1 previous error\n",
+      "duration_seconds": 1.9484899044036865
+    },
+    {
+      "task_id": "borrow_004",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\nfn analyze(nums: Vec<i32>) -> (i32, usize) {\n    let max = nums.iter().max().unwrap();\n    let sum: i32 = nums.iter().sum();\n    let avg = sum / nums.len() as i32;\n    let count = nums.into_iter().filter(|n| n > &avg).count();\n    (*max, count)\n}\n\nfn main() {\n    let v = vec![1, 5, 3, 8, 2, 7];\n    let (m, c) = analyze(v);\n    println!(\"max={}, above_avg={}\", m, c);\n}\n```",
+      "extracted_patch": "fn analyze(nums: Vec<i32>) -> (i32, usize) {\n    let max = nums.iter().max().unwrap();\n    let sum: i32 = nums.iter().sum();\n    let avg = sum / nums.len() as i32;\n    let count = nums.into_iter().filter(|n| n > &avg).count();\n    (*max, count)\n}\n\nfn main() {\n    let v = vec![1, 5, 3, 8, 2, 7];\n    let (m, c) = analyze(v);\n    println!(\"max={}, above_avg={}\", m, c);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_qc1i9htf)\nerror[E0505]: cannot move out of `nums` because it is borrowed\n --> src/main.rs:5:17\n  |\n1 | fn analyze(nums: Vec<i32>) -> (i32, usize) {\n  |            ---- binding `nums` declared here\n2 |     let max = nums.iter().max().unwrap();\n  |               ---- borrow of `nums` occurs here\n...\n5 |     let count = nums.into_iter().filter(|n| n > &avg).count();\n  |                 ^^^^ move out of `nums` occurs here\n6 |     (*max, count)\n  |      ---- borrow later used here\n\nFor more information about this error, try `rustc --explain E0505`.\nerror: could not compile `temrust_eval` (bin \"temrust_eval\") due to 1 previous error\n",
+      "duration_seconds": 2.4809529781341553
+    },
+    {
+      "task_id": "borrow_005",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\nfn shift_by_first(v: &mut Vec<i32>) {\n    let delta = *v.first().unwrap();\n    for x in v.iter_mut() {\n        *x += delta;\n    }\n}\n\nfn shift_by_first_v2(v: &mut Vec<i32>) {\n    let first = &v[0];\n    for x in v.iter_mut() {\n        *x += *first;\n    }\n}\n\nfn main() {\n    let mut v = vec![10, 20, 30];\n    shift_by_first_v2(&mut v);\n    println!(\"{:?}\", v);\n}\n```",
+      "extracted_patch": "fn shift_by_first(v: &mut Vec<i32>) {\n    let delta = *v.first().unwrap();\n    for x in v.iter_mut() {\n        *x += delta;\n    }\n}\n\nfn shift_by_first_v2(v: &mut Vec<i32>) {\n    let first = &v[0];\n    for x in v.iter_mut() {\n        *x += *first;\n    }\n}\n\nfn main() {\n    let mut v = vec![10, 20, 30];\n    shift_by_first_v2(&mut v);\n    println!(\"{:?}\", v);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_vc2ybibo)\nerror[E0502]: cannot borrow `*v` as mutable because it is also borrowed as immutable\n  --> src/main.rs:10:14\n   |\n 9 |     let first = &v[0];\n   |                  - immutable borrow occurs here\n10 |     for x in v.iter_mut() {\n   |              ^ mutable borrow occurs here\n11 |         *x += *first;\n   |               ------ immutable borrow later used here\n\nFor more information about this error, try `rustc --explain E0502`.\nerror: could not compile `temrust_eval` (bin \"temrust_eval\") due to 1 previous error\n",
+      "duration_seconds": 2.325568914413452
+    },
+    {
+      "task_id": "borrow_006",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nuse std::collections::HashMap;\n\nfn bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get(key).copied().unwrap_or(0);\n    let new_val = current + 1;\n    map.insert(key.to_string(), new_val);\n    new_val\n}\n\nfn double_bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get_mut(key).unwrap();\n    *current += 1;\n    *current + 1\n}\n\nfn main() {\n    let mut m = HashMap::new();\n    m.insert(String::from(\"a\"), 5);\n    println!(\"{}\", bump(&mut m, \"a\"));\n    println!(\"{}\", double_bump(&mut m, \"a\"));\n}\n```",
+      "extracted_patch": "use std::collections::HashMap;\n\nfn bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get(key).copied().unwrap_or(0);\n    let new_val = current + 1;\n    map.insert(key.to_string(), new_val);\n    new_val\n}\n\nfn double_bump(map: &mut HashMap<String, i32>, key: &str) -> i32 {\n    let current = map.get_mut(key).unwrap();\n    *current += 1;\n    *current + 1\n}\n\nfn main() {\n    let mut m = HashMap::new();\n    m.insert(String::from(\"a\"), 5);\n    println!(\"{}\", bump(&mut m, \"a\"));\n    println!(\"{}\", double_bump(&mut m, \"a\"));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust___0yfue1)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 3.1185309886932373
+    },
+    {
+      "task_id": "borrow_007",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn vowel_heavy_count(text: String) -> usize {\n    let words: Vec<&str> = text.split_whitespace().collect();\n    let total = words.len();\n    let mut count = 0;\n    for w in words {\n        let v = w.chars().filter(|c| matches!(c, 'a'|'e'|'i'|'o'|'u')).count();\n        let c = w.len() - v;\n        if v > c {\n            count += 1;\n        }\n    }\n    println!(\"checked {} words\", total);\n    count\n}\n\nfn main() {\n    let s = String::from(\"hello rust beautiful world\");\n    println!(\"{}\", vowel_heavy_count(s));\n}\n```",
+      "extracted_patch": "fn vowel_heavy_count(text: String) -> usize {\n    let words: Vec<&str> = text.split_whitespace().collect();\n    let total = words.len();\n    let mut count = 0;\n    for w in words {\n        let v = w.chars().filter(|c| matches!(c, 'a'|'e'|'i'|'o'|'u')).count();\n        let c = w.len() - v;\n        if v > c {\n            count += 1;\n        }\n    }\n    println!(\"checked {} words\", total);\n    count\n}\n\nfn main() {\n    let s = String::from(\"hello rust beautiful world\");\n    println!(\"{}\", vowel_heavy_count(s));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_scs0fo_s)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s\n",
+      "duration_seconds": 2.7770609855651855
+    },
+    {
+      "task_id": "issue_001",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\n/// Adds two integers.\npub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn it_adds() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n    }\n}\n```",
+      "extracted_patch": "/// Adds two integers.\npub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn it_adds() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n    }\n}",
+      "verifier_stdout": "\nrunning 1 test\ntest tests::it_adds ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_xfdetrlc)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.41s\n     Running unittests src/lib.rs (target/debug/deps/temrust_eval-2bf83dbfe19af2fb)\n   Doc-tests temrust_eval\n",
+      "duration_seconds": 2.766680955886841
+    },
+    {
+      "task_id": "issue_002",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\npub struct Stack<T> {\n    items: Vec<T>,\n}\n\nimpl<T> Stack<T> {\n    pub fn new() -> Self {\n        Stack { items: Vec::new() }\n    }\n\n    pub fn push(&mut self, item: T) {\n        self.items.push(item);\n    }\n\n    pub fn pop(&mut self) -> Option<T> {\n        if !self.items.is_empty() {\n            Some(self.items.remove(0))\n        } else {\n            None\n        }\n    }\n\n    pub fn len(&self) -> usize {\n        self.items.len()\n    }\n\n    pub fn is_empty(&self) -> bool {\n        self.items.is_empty()\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn lifo_order() {\n        let mut s = Stack::new();\n        s.push(1);\n        s.push(2);\n        s.push(3);\n        assert_eq!(s.pop(), Some(3));\n        assert_eq!(s.pop(), Some(2));\n        assert_eq!(s.pop(), Some(1));\n        assert_eq!(s.pop(), None);\n    }\n\n    #[test]\n    fn empty_pop() {\n        let mut s: Stack<i32> = Stack::new();\n        assert_eq!(s.pop(), None);\n    }\n}\n```",
+      "extracted_patch": "pub struct Stack<T> {\n    items: Vec<T>,\n}\n\nimpl<T> Stack<T> {\n    pub fn new() -> Self {\n        Stack { items: Vec::new() }\n    }\n\n    pub fn push(&mut self, item: T) {\n        self.items.push(item);\n    }\n\n    pub fn pop(&mut self) -> Option<T> {\n        if !self.items.is_empty() {\n            Some(self.items.remove(0))\n        } else {\n            None\n        }\n    }\n\n    pub fn len(&self) -> usize {\n        self.items.len()\n    }\n\n    pub fn is_empty(&self) -> bool {\n        self.items.is_empty()\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn lifo_order() {\n        let mut s = Stack::new();\n        s.push(1);\n        s.push(2);\n        s.push(3);\n        assert_eq!(s.pop(), Some(3));\n        assert_eq!(s.pop(), Some(2));\n        assert_eq!(s.pop(), Some(1));\n        assert_eq!(s.pop(), None);\n    }\n\n    #[test]\n    fn empty_pop() {\n        let mut s: Stack<i32> = Stack::new();\n        assert_eq!(s.pop(), None);\n    }\n}",
+      "verifier_stdout": "\nrunning 2 tests\ntest tests::empty_pop ... ok\ntest tests::lifo_order ... FAILED\n\nfailures:\n\n---- tests::lifo_order stdout ----\n\nthread 'tests::lifo_order' (16289792) panicked at src/lib.rs:41:9:\nassertion `left == right` failed\n  left: Some(1)\n right: Some(3)\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    tests::lifo_order\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_ld4p5o4d)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s\n     Running unittests src/lib.rs (target/debug/deps/temrust_eval-2bf83dbfe19af2fb)\nerror: test failed, to rerun pass `--lib`\n",
+      "duration_seconds": 5.655725002288818
+    },
+    {
+      "task_id": "issue_003",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\n#[derive(Debug, PartialEq, Eq)]\npub struct Version {\n    pub major: u32,\n    pub minor: u32,\n    pub patch: u32,\n}\n\npub fn parse_version(s: &str) -> Result<Version, String> {\n    let parts: Vec<&str> = s.split('.').collect();\n    if parts.len() != 3 {\n        return Err(format!(\"expected 3 parts, got {}\", parts.len()));\n    }\n    // Corrected: indices are reversed\n    let major: u32 = parts[0].parse().map_err(|e| format!(\"major: {}\", e))?;\n    let minor: u32 = parts[1].parse().map_err(|e| format!(\"minor: {}\", e))?;\n    let patch: u32 = parts[2].parse().map_err(|e| format!(\"patch: {}\", e))?;\n    Ok(Version { major, minor, patch })\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn parses_simple() {\n        assert_eq!(\n            parse_version(\"1.2.3\").unwrap(),\n            Version { major: 1, minor: 2, patch: 3 }\n        );\n    }\n\n    #[test]\n    fn parses_zeros() {\n        assert_eq!(\n            parse_version(\"0.0.0\").unwrap(),\n            Version { major: 0, minor: 0, patch: 0 }\n        );\n    }\n\n    #[test]\n    fn rejects_bad_input() {\n        assert!(parse_version(\"1.2\").is_err());\n        assert!(parse_version(\"1.2.x\").is_err());\n    }\n}\n```",
+      "extracted_patch": "#[derive(Debug, PartialEq, Eq)]\npub struct Version {\n    pub major: u32,\n    pub minor: u32,\n    pub patch: u32,\n}\n\npub fn parse_version(s: &str) -> Result<Version, String> {\n    let parts: Vec<&str> = s.split('.').collect();\n    if parts.len() != 3 {\n        return Err(format!(\"expected 3 parts, got {}\", parts.len()));\n    }\n    // Corrected: indices are reversed\n    let major: u32 = parts[0].parse().map_err(|e| format!(\"major: {}\", e))?;\n    let minor: u32 = parts[1].parse().map_err(|e| format!(\"minor: {}\", e))?;\n    let patch: u32 = parts[2].parse().map_err(|e| format!(\"patch: {}\", e))?;\n    Ok(Version { major, minor, patch })\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn parses_simple() {\n        assert_eq!(\n            parse_version(\"1.2.3\").unwrap(),\n            Version { major: 1, minor: 2, patch: 3 }\n        );\n    }\n\n    #[test]\n    fn parses_zeros() {\n        assert_eq!(\n            parse_version(\"0.0.0\").unwrap(),\n            Version { major: 0, minor: 0, patch: 0 }\n        );\n    }\n\n    #[test]\n    fn rejects_bad_input() {\n        assert!(parse_version(\"1.2\").is_err());\n        assert!(parse_version(\"1.2.x\").is_err());\n    }\n}",
+      "verifier_stdout": "\nrunning 3 tests\ntest tests::parses_simple ... ok\ntest tests::parses_zeros ... ok\ntest tests::rejects_bad_input ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_a9itnag8)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s\n     Running unittests src/lib.rs (target/debug/deps/temrust_eval-2bf83dbfe19af2fb)\n   Doc-tests temrust_eval\n",
+      "duration_seconds": 6.947014808654785
+    },
+    {
+      "task_id": "issue_004",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\n/// Find target in sorted slice. Returns Some(index) if found, None otherwise.\npub fn binary_search<T: Ord>(arr: &[T], target: &T) -> Option<usize> {\n    let mut low = 0;\n    let mut high = arr.len() - 1; // Adjusted to avoid out-of-bounds error\n    while low <= high {\n        let mid = (low + high) / 2;\n        match arr[mid].cmp(target) {\n            std::cmp::Ordering::Equal => return Some(mid),\n            std::cmp::Ordering::Less => low = mid + 1,\n            std::cmp::Ordering::Greater => high = mid - 1,\n        }\n    }\n    None\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn finds_target() {\n        let v = vec![1, 3, 5, 7, 9];\n        assert_eq!(binary_search(&v, &5), Some(2));\n        assert_eq!(binary_search(&v, &1), Some(0));\n        assert_eq!(binary_search(&v, &9), Some(4));\n    }\n\n    #[test]\n    fn returns_none_when_absent() {\n        let v = vec![1, 3, 5, 7, 9];\n        assert_eq!(binary_search(&v, &4), None);\n        assert_eq!(binary_search(&v, &0), None);\n        assert_eq!(binary_search(&v, &10), None);\n    }\n\n    #[test]\n    fn empty_slice() {\n        let v: Vec<i32> = vec![];\n        assert_eq!(binary_search(&v, &5), None);\n    }\n}\n```",
+      "extracted_patch": "/// Find target in sorted slice. Returns Some(index) if found, None otherwise.\npub fn binary_search<T: Ord>(arr: &[T], target: &T) -> Option<usize> {\n    let mut low = 0;\n    let mut high = arr.len() - 1; // Adjusted to avoid out-of-bounds error\n    while low <= high {\n        let mid = (low + high) / 2;\n        match arr[mid].cmp(target) {\n            std::cmp::Ordering::Equal => return Some(mid),\n            std::cmp::Ordering::Less => low = mid + 1,\n            std::cmp::Ordering::Greater => high = mid - 1,\n        }\n    }\n    None\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn finds_target() {\n        let v = vec![1, 3, 5, 7, 9];\n        assert_eq!(binary_search(&v, &5), Some(2));\n        assert_eq!(binary_search(&v, &1), Some(0));\n        assert_eq!(binary_search(&v, &9), Some(4));\n    }\n\n    #[test]\n    fn returns_none_when_absent() {\n        let v = vec![1, 3, 5, 7, 9];\n        assert_eq!(binary_search(&v, &4), None);\n        assert_eq!(binary_search(&v, &0), None);\n        assert_eq!(binary_search(&v, &10), None);\n    }\n\n    #[test]\n    fn empty_slice() {\n        let v: Vec<i32> = vec![];\n        assert_eq!(binary_search(&v, &5), None);\n    }\n}",
+      "verifier_stdout": "\nrunning 3 tests\ntest tests::finds_target ... ok\ntest tests::returns_none_when_absent ... FAILED\ntest tests::empty_slice ... FAILED\n\nfailures:\n\n---- tests::returns_none_when_absent stdout ----\n\nthread 'tests::returns_none_when_absent' (16290605) panicked at src/lib.rs:10:51:\nattempt to subtract with overflow\n\n---- tests::empty_slice stdout ----\n\nthread 'tests::empty_slice' (16290603) panicked at src/lib.rs:4:20:\nattempt to subtract with overflow\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    tests::empty_slice\n    tests::returns_none_when_absent\n\ntest result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_oe9zazhi)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s\n     Running unittests src/lib.rs (target/debug/deps/temrust_eval-2bf83dbfe19af2fb)\nerror: test failed, to rerun pass `--lib`\n",
+      "duration_seconds": 7.349785089492798
+    },
+    {
+      "task_id": "test_001",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\npub fn is_palindrome(s: &str) -> bool {\n    let chars: Vec<char> = s.chars().collect();\n    let n = chars.len();\n    for i in 0..n / 2 {\n        if chars[i] != chars[n - 1 - i] {\n            return false;\n        }\n    }\n    true\n}\n\nfn main() {\n    println!(\"{}\", is_palindrome(\"racecar\"));\n}\n\n#[test]\nfn test_is_palindrome_empty_string() {\n    assert_eq!(is_palindrome(\"\"), true);\n}\n\n#[test]\nfn test_is_palindrome_single_character() {\n    assert_eq!(is_palindrome(\"a\"), true);\n}\n\n#[test]\nfn test_is_palindrome_simple_palindrome() {\n    assert_eq!(is_palindrome(\"level\"), true);\n}\n\n#[test]\nfn test_is_palindrome_non_palindrome() {\n    assert_eq!(is_palindrome(\"hello\"), false);\n}\n\n#[test]\nfn test_is_palindrome_palindrome_with_mixed_case() {\n    assert_eq!(is_palindrome(\"A man a plan a canal Panama\"), true);\n}\n```",
+      "extracted_patch": "pub fn is_palindrome(s: &str) -> bool {\n    let chars: Vec<char> = s.chars().collect();\n    let n = chars.len();\n    for i in 0..n / 2 {\n        if chars[i] != chars[n - 1 - i] {\n            return false;\n        }\n    }\n    true\n}\n\nfn main() {\n    println!(\"{}\", is_palindrome(\"racecar\"));\n}\n\n#[test]\nfn test_is_palindrome_empty_string() {\n    assert_eq!(is_palindrome(\"\"), true);\n}\n\n#[test]\nfn test_is_palindrome_single_character() {\n    assert_eq!(is_palindrome(\"a\"), true);\n}\n\n#[test]\nfn test_is_palindrome_simple_palindrome() {\n    assert_eq!(is_palindrome(\"level\"), true);\n}\n\n#[test]\nfn test_is_palindrome_non_palindrome() {\n    assert_eq!(is_palindrome(\"hello\"), false);\n}\n\n#[test]\nfn test_is_palindrome_palindrome_with_mixed_case() {\n    assert_eq!(is_palindrome(\"A man a plan a canal Panama\"), true);\n}",
+      "verifier_stdout": "\nrunning 5 tests\ntest test_is_palindrome_non_palindrome ... ok\ntest test_is_palindrome_empty_string ... ok\ntest test_is_palindrome_single_character ... ok\ntest test_is_palindrome_simple_palindrome ... ok\ntest test_is_palindrome_palindrome_with_mixed_case ... FAILED\n\nfailures:\n\n---- test_is_palindrome_palindrome_with_mixed_case stdout ----\n\nthread 'test_is_palindrome_palindrome_with_mixed_case' (16290783) panicked at src/main.rs:38:5:\nassertion `left == right` failed\n  left: false\n right: true\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_is_palindrome_palindrome_with_mixed_case\n\ntest result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_evhsmiid)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s\n     Running unittests src/main.rs (target/debug/deps/temrust_eval-9576ba5eee5db900)\nerror: test failed, to rerun pass `--bin temrust_eval`\n",
+      "duration_seconds": 4.6676270961761475
+    },
+    {
+      "task_id": "test_002",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\npub fn count_vowels(s: &str) -> usize {\n    s.chars()\n        .filter(|c| matches!(c.to_ascii_lowercase(), 'a' | 'e' | 'i' | 'o' | 'u'))\n        .count()\n}\n\nfn main() {\n    println!(\"{}\", count_vowels(\"Hello World\"));\n}\n\n#[test]\nfn test_count_vowels_empty_string() {\n    assert_eq!(count_vowels(\"\"), 0);\n}\n\n#[test]\nfn test_count_vowels_all_vowels() {\n    assert_eq!(count_vowels(\"aeiouAEIOU\"), 10);\n}\n\n#[test]\nfn test_count_vowels_no_vowels() {\n    assert_eq!(count_vowels(\"bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ\"), 0);\n}\n\n#[test]\nfn test_count_vowels_mixed_letters() {\n    assert_eq!(count_vowels(\"Hello World\"), 3);\n}\n\n#[test]\nfn test_count_vowels_uppercase_letters() {\n    assert_eq!(count_vowels(\"HELLO WORLD\"), 3);\n}\n```",
+      "extracted_patch": "pub fn count_vowels(s: &str) -> usize {\n    s.chars()\n        .filter(|c| matches!(c.to_ascii_lowercase(), 'a' | 'e' | 'i' | 'o' | 'u'))\n        .count()\n}\n\nfn main() {\n    println!(\"{}\", count_vowels(\"Hello World\"));\n}\n\n#[test]\nfn test_count_vowels_empty_string() {\n    assert_eq!(count_vowels(\"\"), 0);\n}\n\n#[test]\nfn test_count_vowels_all_vowels() {\n    assert_eq!(count_vowels(\"aeiouAEIOU\"), 10);\n}\n\n#[test]\nfn test_count_vowels_no_vowels() {\n    assert_eq!(count_vowels(\"bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ\"), 0);\n}\n\n#[test]\nfn test_count_vowels_mixed_letters() {\n    assert_eq!(count_vowels(\"Hello World\"), 3);\n}\n\n#[test]\nfn test_count_vowels_uppercase_letters() {\n    assert_eq!(count_vowels(\"HELLO WORLD\"), 3);\n}",
+      "verifier_stdout": "\nrunning 5 tests\ntest test_count_vowels_all_vowels ... ok\ntest test_count_vowels_mixed_letters ... ok\ntest test_count_vowels_uppercase_letters ... ok\ntest test_count_vowels_empty_string ... ok\ntest test_count_vowels_no_vowels ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_cy7y0zz0)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s\n     Running unittests src/main.rs (target/debug/deps/temrust_eval-9576ba5eee5db900)\n",
+      "duration_seconds": 4.961539030075073
+    },
+    {
+      "task_id": "test_003",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\npub fn fizzbuzz(n: u32) -> String {\n    match (n % 3, n % 5) {\n        (0, 0) => String::from(\"FizzBuzz\"),\n        (0, _) => String::from(\"Fizz\"),\n        (_, 0) => String::from(\"Buzz\"),\n        _ => n.to_string(),\n    }\n}\n\nfn main() {\n    for i in 1..=15 {\n        println!(\"{}\", fizzbuzz(i));\n    }\n\n    #[test]\n    fn test_fizzbuzz() {\n        assert_eq!(fizzbuzz(1), \"1\");\n        assert_eq!(fizzbuzz(3), \"Fizz\");\n        assert_eq!(fizzbuzz(5), \"Buzz\");\n        assert_eq!(fizzbuzz(15), \"FizzBuzz\");\n        assert_eq!(fizzbuzz(7), \"7\");\n    }\n}\n```",
+      "extracted_patch": "pub fn fizzbuzz(n: u32) -> String {\n    match (n % 3, n % 5) {\n        (0, 0) => String::from(\"FizzBuzz\"),\n        (0, _) => String::from(\"Fizz\"),\n        (_, 0) => String::from(\"Buzz\"),\n        _ => n.to_string(),\n    }\n}\n\nfn main() {\n    for i in 1..=15 {\n        println!(\"{}\", fizzbuzz(i));\n    }\n\n    #[test]\n    fn test_fizzbuzz() {\n        assert_eq!(fizzbuzz(1), \"1\");\n        assert_eq!(fizzbuzz(3), \"Fizz\");\n        assert_eq!(fizzbuzz(5), \"Buzz\");\n        assert_eq!(fizzbuzz(15), \"FizzBuzz\");\n        assert_eq!(fizzbuzz(7), \"7\");\n    }\n}",
+      "verifier_stdout": "\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_xzil6fhw)\nwarning: cannot test inner items\n  --> src/main.rs:15:5\n   |\n15 |     #[test]\n   |     ^^^^^^^\n   |\n   = note: `#[warn(unnameable_test_items)]` on by default\n\nwarning: `temrust_eval` (bin \"temrust_eval\" test) generated 1 warning\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s\n     Running unittests src/main.rs (target/debug/deps/temrust_eval-9576ba5eee5db900)\n",
+      "duration_seconds": 4.045456886291504
+    },
+    {
+      "task_id": "test_004",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\nuse std::vec::Vec;\n\npub fn parse_csv_line(line: &str) -> Vec<String> {\n    line.split(',').map(|s| s.to_string()).collect()\n}\n\n#[test]\nfn test_parse_csv_line() {\n    assert_eq!(parse_csv_line(\"\"), vec![]);\n    assert_eq!(parse_csv_line(\"a\"), vec![String::from(\"a\")]);\n    assert_eq!(parse_csv_line(\"a,b,c\"), vec![String::from(\"a\"), String::from(\"b\"), String::from(\"c\")]);\n    assert_eq!(parse_csv_line(\"  a, b , c  \"), vec![String::from(\"  a\"), String::from(\" b \"), String::from(\" c  \")]);\n}\n```",
+      "extracted_patch": "use std::vec::Vec;\n\npub fn parse_csv_line(line: &str) -> Vec<String> {\n    line.split(',').map(|s| s.to_string()).collect()\n}\n\n#[test]\nfn test_parse_csv_line() {\n    assert_eq!(parse_csv_line(\"\"), vec![]);\n    assert_eq!(parse_csv_line(\"a\"), vec![String::from(\"a\")]);\n    assert_eq!(parse_csv_line(\"a,b,c\"), vec![String::from(\"a\"), String::from(\"b\"), String::from(\"c\")]);\n    assert_eq!(parse_csv_line(\"  a, b , c  \"), vec![String::from(\"  a\"), String::from(\" b \"), String::from(\" c  \")]);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_u7pkjulm)\nerror[E0282]: type annotations needed\n --> src/main.rs:9:5\n  |\n9 |     assert_eq!(parse_csv_line(\"\"), vec![]);\n  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot infer type\n  |\n  = note: this error originates in the macro `assert_eq` (in Nightly builds, run with -Z macro-backtrace for more info)\n\nerror[E0283]: type annotations needed\n --> src/main.rs:9:5\n  |\n9 |     assert_eq!(parse_csv_line(\"\"), vec![]);\n  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot infer type\n  |\n  = note: multiple `impl`s satisfying `String: PartialEq<_>` found in the following crates: `alloc`, `std`:\n          - impl PartialEq for String;\n          - impl PartialEq<Path> for String;\n          - impl PartialEq<PathBuf> for String;\n  = note: required for `Vec<String>` to implement `PartialEq<Vec<_>>`\n  = note: this error originates in the macro `assert_eq` (in Nightly builds, run with -Z macro-backtrace for more info)\n\nSome errors have detailed explanations: E0282, E0283.\nFor more information about an error, try `rustc --explain E0282`.\nerror: could not compile `temrust_eval` (bin \"temrust_eval\" test) due to 2 previous errors\n",
+      "duration_seconds": 3.1444621086120605
+    },
+    {
+      "task_id": "test_005",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\npub struct Counter {\n    value: i32,\n}\n\nimpl Counter {\n    pub fn new() -> Self { Counter { value: 0 } }\n    pub fn value(&self) -> i32 { self.value }\n    pub fn increment(&mut self) { self.value += 1; }\n    pub fn reset(&mut self) { self.value = 0; }\n}\n\nfn main() {\n    let mut c = Counter::new();\n    assert_eq!(c.value(), 0);\n    c.increment();\n    assert_eq!(c.value(), 1);\n    c.increment();\n    assert_eq!(c.value(), 2);\n    c.reset();\n    assert_eq!(c.value(), 0);\n}\n```",
+      "extracted_patch": "pub struct Counter {\n    value: i32,\n}\n\nimpl Counter {\n    pub fn new() -> Self { Counter { value: 0 } }\n    pub fn value(&self) -> i32 { self.value }\n    pub fn increment(&mut self) { self.value += 1; }\n    pub fn reset(&mut self) { self.value = 0; }\n}\n\nfn main() {\n    let mut c = Counter::new();\n    assert_eq!(c.value(), 0);\n    c.increment();\n    assert_eq!(c.value(), 1);\n    c.increment();\n    assert_eq!(c.value(), 2);\n    c.reset();\n    assert_eq!(c.value(), 0);\n}",
+      "verifier_stdout": "\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+      "verifier_stderr": "   Compiling temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_4dvmr1h1)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s\n     Running unittests src/main.rs (target/debug/deps/temrust_eval-9576ba5eee5db900)\n",
+      "duration_seconds": 3.235643148422241
+    },
+    {
+      "task_id": "type_001",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn main() {\n    let nums: Vec<i32> = vec![1, 2, 3, 4, 5];\n    let total: i32 = nums.iter().sum();\n    let avg = total as f64 / nums.len() as f64;\n    println!(\"avg = {}\", avg);\n}\n```",
+      "extracted_patch": "fn main() {\n    let nums: Vec<i32> = vec![1, 2, 3, 4, 5];\n    let total: i32 = nums.iter().sum();\n    let avg = total as f64 / nums.len() as f64;\n    println!(\"avg = {}\", avg);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_61tu2awb)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s\n",
+      "duration_seconds": 1.5618939399719238
+    },
+    {
+      "task_id": "type_002",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn double(s: String) -> String {\n    format!(\"{}{}\", s, s)\n}\n\nfn main() {\n    let greeting = String::from(\"hello \");\n    println!(\"{}\", double(greeting));\n}\n```",
+      "extracted_patch": "fn double(s: String) -> String {\n    format!(\"{}{}\", s, s)\n}\n\nfn main() {\n    let greeting = String::from(\"hello \");\n    println!(\"{}\", double(greeting));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_w316zesh)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s\n",
+      "duration_seconds": 1.0249509811401367
+    },
+    {
+      "task_id": "type_003",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn sum_strings(strs: Vec<&str>) -> i32 {\n    let mut total = 0;\n    for s in strs {\n        if let Ok(num) = s.parse::<i32>() {\n            total += num;\n        } else {\n            // Default to 0 if parsing fails\n            total += 0;\n        }\n    }\n    total\n}\n\nfn main() {\n    let v = vec![\"1\", \"2\", \"3\", \"oops\", \"4\"];\n    println!(\"{}\", sum_strings(v));\n}\n```",
+      "extracted_patch": "fn sum_strings(strs: Vec<&str>) -> i32 {\n    let mut total = 0;\n    for s in strs {\n        if let Ok(num) = s.parse::<i32>() {\n            total += num;\n        } else {\n            // Default to 0 if parsing fails\n            total += 0;\n        }\n    }\n    total\n}\n\nfn main() {\n    let v = vec![\"1\", \"2\", \"3\", \"oops\", \"4\"];\n    println!(\"{}\", sum_strings(v));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_7ty5hxhv)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 2.3113391399383545
+    },
+    {
+      "task_id": "type_004",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\nfn longer<T>(a: &[T], b: &[T]) -> &[T] {\n    if a.len() >= b.len() { a } else { b }\n}\n\nfn main() {\n    let x = vec![1, 2, 3];\n    let y = vec![4, 5];\n    println!(\"{:?}\", longer(&x, &y));\n}\n```",
+      "extracted_patch": "fn longer<T>(a: &[T], b: &[T]) -> &[T] {\n    if a.len() >= b.len() { a } else { b }\n}\n\nfn main() {\n    let x = vec![1, 2, 3];\n    let y = vec![4, 5];\n    println!(\"{:?}\", longer(&x, &y));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_y_8adr3e)\nerror[E0106]: missing lifetime specifier\n --> src/main.rs:1:35\n  |\n1 | fn longer<T>(a: &[T], b: &[T]) -> &[T] {\n  |                 ----     ----     ^ expected named lifetime parameter\n  |\n  = help: this function's return type contains a borrowed value, but the signature does not say whether it is borrowed from `a` or `b`\nhelp: consider introducing a named lifetime parameter\n  |\n1 | fn longer<'a, T>(a: &'a [T], b: &'a [T]) -> &'a [T] {\n  |           +++        ++          ++          ++\n\nFor more information about this error, try `rustc --explain E0106`.\nerror: could not compile `temrust_eval` (bin \"temrust_eval\") due to 1 previous error\n",
+      "duration_seconds": 1.8648900985717773
+    },
+    {
+      "task_id": "type_005",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": false,
+      "error_msg": null,
+      "raw_output": "```rust\nuse std::collections::HashMap;\n\nfn unique_only(items: Vec<String>) -> Vec<String> {\n    let mut counts: HashMap<&String, i32> = HashMap::new();\n    for item in items {\n        *counts.entry(&item).or_insert(0) += 1;\n    }\n    counts.iter().filter(|(_, c)| **c == 1).map(|(k, _)| k.clone()).collect()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"b\"), String::from(\"a\"), String::from(\"c\")];\n    println!(\"{:?}\", unique_only(v));\n}\n```",
+      "extracted_patch": "use std::collections::HashMap;\n\nfn unique_only(items: Vec<String>) -> Vec<String> {\n    let mut counts: HashMap<&String, i32> = HashMap::new();\n    for item in items {\n        *counts.entry(&item).or_insert(0) += 1;\n    }\n    counts.iter().filter(|(_, c)| **c == 1).map(|(k, _)| k.clone()).collect()\n}\n\nfn main() {\n    let v = vec![String::from(\"a\"), String::from(\"b\"), String::from(\"a\"), String::from(\"c\")];\n    println!(\"{:?}\", unique_only(v));\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_xwqq1nk3)\nerror[E0277]: a value of type `Vec<String>` cannot be built from an iterator over elements of type `&String`\n --> src/main.rs:8:69\n  |\n8 |     counts.iter().filter(|(_, c)| **c == 1).map(|(k, _)| k.clone()).collect()\n  |                                                                     ^^^^^^^ value of type `Vec<String>` cannot be built from `std::iter::Iterator<Item=&String>`\n  |\nhelp: the trait `FromIterator<&String>` is not implemented for `Vec<String>`\n      but trait `FromIterator<String>` is implemented for it\n --> /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/alloc/src/vec/mod.rs:3721:1\n  = help: for that trait implementation, expected `String`, found `&String`\nnote: the method call chain might not have had the expected associated types\n --> src/main.rs:8:45\n  |\n4 |     let mut counts: HashMap<&String, i32> = HashMap::new();\n  |                                             -------------- this expression has type `HashMap<&String, i32>`\n...\n8 |     counts.iter().filter(|(_, c)| **c == 1).map(|(k, _)| k.clone()).collect()\n  |            ------ ------------------------- ^^^^^^^^^^^^^^^^^^^^^^^ `Iterator::Item` changed to `&String` here\n  |            |      |\n  |            |      `Iterator::Item` remains `(&&String, &i32)` here\n  |            `Iterator::Item` is `(&&String, &i32)` here\nnote: required by a bound in `collect`\n --> /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/iter/traits/iterator.rs:2015:5\n\nFor more information about this error, try `rustc --explain E0277`.\nerror: could not compile `temrust_eval` (bin \"temrust_eval\") due to 1 previous error\n",
+      "duration_seconds": 3.23173189163208
+    },
+    {
+      "task_id": "type_006",
+      "model_id": "qwen2.5-coder:1.5b",
+      "passed": true,
+      "error_msg": null,
+      "raw_output": "```rust\nfn print_twice<T: std::fmt::Display>(items: &[T]) {\n    for item in items {\n        println!(\"{}\", item);\n    }\n}\n\nfn main() {\n    let v = vec![1, 2, 3];\n    print_twice(&v);\n    let s = vec![\"a\", \"b\", \"c\"];\n    print_twice(&s);\n}\n```",
+      "extracted_patch": "fn print_twice<T: std::fmt::Display>(items: &[T]) {\n    for item in items {\n        println!(\"{}\", item);\n    }\n}\n\nfn main() {\n    let v = vec![1, 2, 3];\n    print_twice(&v);\n    let s = vec![\"a\", \"b\", \"c\"];\n    print_twice(&s);\n}",
+      "verifier_stdout": "",
+      "verifier_stderr": "    Checking temrust_eval v0.1.0 (/private/var/folders/h_/5nv6lvq55j31mpkxs8vwqyk40000gn/T/temrust_0ijjv8av)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s\n",
+      "duration_seconds": 1.8136920928955078
+    }
+  ]
+}
