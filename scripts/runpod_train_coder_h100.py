@@ -105,6 +105,8 @@ touch /workspace/setup.log
         "trl==0.11.4" \
         "accelerate==1.0.1" \
         "datasets==3.0.2" \
+        "rich>=13" \
+        sentencepiece protobuf \
         fastapi uvicorn
     echo "[$(date +%H:%M:%S)] deps installed"
     git clone "https://${GH_TOKEN}@github.com/temm1e-labs/temrust.git" /workspace/temrust
