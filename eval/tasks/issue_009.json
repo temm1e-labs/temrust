@@ -1,0 +1,15 @@
+{
+  "id": "issue_009",
+  "sub_eval": "issue",
+  "task_prompt": "There's a bug in `is_anagram` in `src/lib.rs`: it incorrectly says `\"listen\"` and `\"silent\"` are NOT anagrams. Fix the function so the existing tests pass. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "/// Returns true iff a and b are anagrams (same multiset of characters).\npub fn is_anagram(a: &str, b: &str) -> bool {\n    if a.len() != b.len() {\n        return false;\n    }\n    let ac: Vec<char> = a.chars().collect();\n    let bc: Vec<char> = b.chars().collect();\n    ac == bc\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn detects_anagrams() {\n        assert!(is_anagram(\"listen\", \"silent\"));\n        assert!(is_anagram(\"a\", \"a\"));\n        assert!(is_anagram(\"\", \"\"));\n        assert!(!is_anagram(\"hello\", \"world\"));\n        assert!(!is_anagram(\"abc\", \"ab\"));\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Comparing character vectors in input order is wrong (positional, not multiset). Fix: sort both before compare. Tests model's ability to read failing assertions and reason about algorithmic correctness.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}

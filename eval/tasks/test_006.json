@@ -1,0 +1,11 @@
+{
+  "id": "test_006",
+  "sub_eval": "test",
+  "task_prompt": "Add a `#[test]` block at the bottom of this file that thoroughly tests `merge_sorted`. The test must pass when run with `cargo test`. Include cases for: both empty, one empty / one not, equal-length non-empty, different-length, and a case verifying duplicate handling (the function preserves duplicates from both inputs). Return the complete program (existing code + new tests) in a single ```rust code block.",
+  "input_code": "/// Merges two already-sorted ascending vectors into a single sorted vector.\n/// Duplicates from both inputs are kept (so [1,2] + [2,3] -> [1,2,2,3]).\npub fn merge_sorted(a: &[i32], b: &[i32]) -> Vec<i32> {\n    let mut out = Vec::with_capacity(a.len() + b.len());\n    let (mut i, mut j) = (0, 0);\n    while i < a.len() && j < b.len() {\n        if a[i] <= b[j] {\n            out.push(a[i]);\n            i += 1;\n        } else {\n            out.push(b[j]);\n            j += 1;\n        }\n    }\n    out.extend_from_slice(&a[i..]);\n    out.extend_from_slice(&b[j..]);\n    out\n}\n\nfn main() {\n    let m = merge_sorted(&[1, 4, 7], &[2, 3, 8]);\n    println!(\"{:?}\", m);\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Tests model's ability to enumerate edge cases AND craft passing assertions. Implementation is correct; bad tests will fail compile or runtime."
+}

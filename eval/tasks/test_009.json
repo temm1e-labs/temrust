@@ -1,0 +1,11 @@
+{
+  "id": "test_009",
+  "sub_eval": "test",
+  "task_prompt": "Add a `#[test]` block at the bottom of this file that thoroughly tests `Stack`. Tests must pass with `cargo test`. Cover: pushing then popping returns the same values in LIFO order, popping from empty returns None, len() and is_empty() reflect state correctly, peek() returns Some on non-empty without removing the item. Return the complete program (existing code + new tests) in a single ```rust code block.",
+  "input_code": "pub struct Stack<T> {\n    items: Vec<T>,\n}\n\nimpl<T> Stack<T> {\n    pub fn new() -> Self { Stack { items: Vec::new() } }\n    pub fn push(&mut self, x: T) { self.items.push(x); }\n    pub fn pop(&mut self) -> Option<T> { self.items.pop() }\n    pub fn peek(&self) -> Option<&T> { self.items.last() }\n    pub fn len(&self) -> usize { self.items.len() }\n    pub fn is_empty(&self) -> bool { self.items.is_empty() }\n}\n\nfn main() {\n    let mut s: Stack<i32> = Stack::new();\n    s.push(1);\n    s.push(2);\n    println!(\"top: {:?}, len: {}\", s.peek(), s.len());\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Tests model's ability to write multi-step state-machine tests for a generic data structure. Implementation is correct."
+}

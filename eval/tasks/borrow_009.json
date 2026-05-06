@@ -1,0 +1,11 @@
+{
+  "id": "borrow_009",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow checker error in this code. The function should return the longest of two `&str` arguments and `main` should print `the longest is: rust-is-fun`. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn longest(a: &str, b: &str) -> &str {\n    if a.len() >= b.len() {\n        a\n    } else {\n        b\n    }\n}\n\nfn main() {\n    let s1 = String::from(\"rust\");\n    let s2 = String::from(\"rust-is-fun\");\n    let result = longest(&s1, &s2);\n    println!(\"the longest is: {}\", result);\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Classic missing-lifetime-annotation. Fix: `fn longest<'a>(a: &'a str, b: &'a str) -> &'a str`. Tests fundamental lifetime annotation. Verifier runs the program."
+}

@@ -1,0 +1,11 @@
+{
+  "id": "test_008",
+  "sub_eval": "test",
+  "task_prompt": "Add a `#[test]` block at the bottom of this file that thoroughly tests `safe_divide`. Tests must pass with `cargo test`. Cover: normal division, division by zero (returns Err), and at least two different non-zero edge cases (negative dividend, zero dividend). Return the complete program (existing code + new tests) in a single ```rust code block.",
+  "input_code": "/// Safely divides two integers; returns Err on division by zero.\npub fn safe_divide(a: i32, b: i32) -> Result<i32, String> {\n    if b == 0 {\n        Err(\"division by zero\".to_string())\n    } else {\n        Ok(a / b)\n    }\n}\n\nfn main() {\n    println!(\"{:?}\", safe_divide(10, 2));\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Tests model's ability to test Result<_, String> APIs including the Err branch."
+}

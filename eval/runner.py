@@ -38,7 +38,10 @@ def run_one(client, task: EvalTask) -> EvalResult:
         {"role": "user", "content": f"{task.task_prompt}\n\n```rust\n{task.input_code}```"},
     ]
     try:
-        text, _ = client.chat(messages, max_tokens=2048, temperature=0.0)
+        # 8192 tokens: thinking models (Qwen3 chat) burn 1-2K on <think> alone.
+        # Cheap models with shorter answers won't use the headroom; this only adds
+        # tokens for hard cases that need them.
+        text, _ = client.chat(messages, max_tokens=8192, temperature=0.0)
     except Exception as e:
         return EvalResult(
             task_id=task.id, model_id=client.model, passed=False,
@@ -60,7 +63,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True, help="Model id, e.g. Qwen/Qwen3-1.7B")
     ap.add_argument("--tasks", default="eval/tasks", help="Path to tasks directory")
-    ap.add_argument("--provider", default="together", choices=["together", "ollama"], help="Inference backend")
+    ap.add_argument("--provider", default="together", choices=["together", "together-base", "ollama", "vllm"], help="Inference backend")
+    ap.add_argument("--base-url", default=None, help="For provider=vllm: base URL of the OpenAI-compatible server")
     ap.add_argument("--out", default=None, help="Output JSON file (default: eval/results/<model>__<ts>.json)")
     ap.add_argument("--limit", type=int, default=0, help="Run only first N tasks (0=all)")
     args = ap.parse_args()
@@ -83,7 +87,7 @@ def main() -> int:
 
     print(f"Running {len(tasks)} tasks on {args.model} via {args.provider}")
 
-    client = make_client(args.provider, args.model)
+    client = make_client(args.provider, args.model, base_url=args.base_url)
 
     results: list[EvalResult] = []
     pass_count = 0

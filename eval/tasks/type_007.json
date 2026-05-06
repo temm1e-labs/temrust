@@ -1,0 +1,11 @@
+{
+  "id": "type_007",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type errors in this Rust code so it compiles and runs as written. The intent is: build a `Vec<Box<dyn Animal>>`, push two different concrete animals into it, then call `.speak()` on each. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "trait Animal {\n    fn speak(&self) -> String;\n}\n\nstruct Dog;\nstruct Cat;\n\nimpl Animal for Dog {\n    fn speak(&self) -> String { \"woof\".to_string() }\n}\n\nimpl Animal for Cat {\n    fn speak(&self) -> String { \"meow\".to_string() }\n}\n\nfn main() {\n    let mut animals: Vec<Animal> = Vec::new();\n    animals.push(Dog);\n    animals.push(Cat);\n    for a in animals {\n        println!(\"{}\", a.speak());\n    }\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Trait object basics. Vec<Animal> is invalid (unsized). Must use Vec<Box<dyn Animal>> and Box::new each push. Tests understanding of dyn-Trait + heap allocation."
+}

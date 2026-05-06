@@ -1,0 +1,15 @@
+{
+  "id": "issue_005",
+  "sub_eval": "issue",
+  "task_prompt": "There's a bug in `fibonacci` in `src/lib.rs`: it returns the wrong value for n>=2 because the base cases are off. Fix the function so the existing tests pass. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "/// Returns the nth Fibonacci number (0-indexed).\npub fn fibonacci(n: u32) -> u64 {\n    if n == 0 {\n        return 1;\n    }\n    if n == 1 {\n        return 2;\n    }\n    fibonacci(n - 1) + fibonacci(n - 2)\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn it_computes_fib() {\n        assert_eq!(fibonacci(0), 0);\n        assert_eq!(fibonacci(1), 1);\n        assert_eq!(fibonacci(2), 1);\n        assert_eq!(fibonacci(7), 13);\n        assert_eq!(fibonacci(10), 55);\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Off-by-one in base cases (returns 1,2 instead of 0,1). Tests must read & match the asserted values; fix is `0` and `1` for the two base cases. Recursion structure is otherwise correct.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}

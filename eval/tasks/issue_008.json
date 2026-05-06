@@ -1,0 +1,15 @@
+{
+  "id": "issue_008",
+  "sub_eval": "issue",
+  "task_prompt": "There's a bug in `mean` in `src/lib.rs`: it panics with division by zero on empty input, but the contract should be `Option<f64>` returning `None` for empty input. Fix the function so the existing tests pass — and update the return type if needed. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "/// Returns the mean of a slice. Should return None for empty slices.\npub fn mean(xs: &[f64]) -> f64 {\n    let sum: f64 = xs.iter().sum();\n    sum / xs.len() as f64\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn it_means() {\n        assert_eq!(mean(&[]), None);\n        assert_eq!(mean(&[1.0, 2.0, 3.0]), Some(2.0));\n        assert_eq!(mean(&[5.0]), Some(5.0));\n        assert_eq!(mean(&[-1.0, 1.0]), Some(0.0));\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Signature mismatch: tests assert against Option<f64> but code returns f64. Fix is to change signature + handle empty case. Tests model's ability to align implementation with test contracts.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}

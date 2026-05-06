@@ -1,0 +1,11 @@
+{
+  "id": "borrow_010",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow checker errors so this code compiles cleanly. The intent is to read each user's name and increment their visit count. Don't change the function signatures — only the implementation of `bump_visits`. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "use std::collections::HashMap;\n\nfn bump_visits(visits: &mut HashMap<String, u32>, names: &[String]) {\n    for name in names {\n        let count = visits.get(name).copied().unwrap_or(0);\n        visits.insert(name.clone(), count + 1);\n        let other = visits.get(name).unwrap();\n        visits.insert(name.clone(), other + 1);\n    }\n}\n\nfn main() {\n    let mut visits: HashMap<String, u32> = HashMap::new();\n    let names = vec![String::from(\"alice\"), String::from(\"bob\"), String::from(\"alice\")];\n    bump_visits(&mut visits, &names);\n    let mut entries: Vec<_> = visits.iter().collect();\n    entries.sort_by_key(|(k, _)| (*k).clone());\n    for (k, v) in entries {\n        println!(\"{}: {}\", k, v);\n    }\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "The double-bump logic is buggy AND borrow-conflicted: holding `other = visits.get(name).unwrap()` while also calling `visits.insert(...)` two-borrows. The second insert is also wrong intent; the cleanest fix collapses both inserts into one `.entry(name.clone()).or_insert(0); *entry += 1;` (or any equivalent). Verifier just runs the program — output content not checked here, only successful exit, so any clean fix passes."
+}

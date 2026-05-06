@@ -1,0 +1,11 @@
+{
+  "id": "borrow_008",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow checker errors in this code so it compiles and prints `final: 5, 6`. The function should still take and return mutable references where shown — only fix the lifetime/borrow issues. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn first(v: &mut Vec<i32>) -> &i32 {\n    &v[0]\n}\n\nfn main() {\n    let mut v = vec![1, 2, 3];\n    let f = first(&mut v);\n    v.push(4);\n    println!(\"first: {}\", f);\n    v[0] = 5;\n    v[1] = 6;\n    println!(\"final: {}, {}\", v[0], v[1]);\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Holding `&i32 = &v[0]` blocks `v.push(4)` (NLL says `f` is alive at the println). Fix: dereference and copy `let f = *first(&mut v);` (or read the value before the push). Verifier runs the program and expects clean execution with the correct printout."
+}

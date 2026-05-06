@@ -1,0 +1,11 @@
+{
+  "id": "type_008",
+  "sub_eval": "type",
+  "task_prompt": "Fix the generics so this `largest` function compiles and prints the largest of `[34, 50, 25, 100, 65]`. The function must work for any type that supports comparison. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn largest<T>(list: &[T]) -> T {\n    let mut largest = list[0];\n    for &item in list {\n        if item > largest {\n            largest = item;\n        }\n    }\n    largest\n}\n\nfn main() {\n    let numbers = vec![34, 50, 25, 100, 65];\n    println!(\"largest: {}\", largest(&numbers));\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "tests_pass",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code",
+  "notes": "Classic Rust Book ch.10 example. `T` needs `PartialOrd + Copy` bounds. Tests bound-inference reasoning."
+}

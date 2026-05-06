@@ -1,0 +1,11 @@
+{
+  "id": "type_009",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type/trait errors so this code compiles cleanly with `cargo check`. The function `print_all` should accept any iterator of items that can be displayed. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn print_all(items: impl Iterator) {\n    for item in items {\n        println!(\"{}\", item);\n    }\n}\n\nfn main() {\n    print_all(vec![1, 2, 3].into_iter());\n    print_all(vec![\"a\", \"b\", \"c\"].into_iter());\n}\n",
+  "verifier_cmd": "cargo check",
+  "expected_outcome": "compiles",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Need to constrain Iterator::Item: Display. Fix: `impl Iterator<Item: std::fmt::Display>` or `<I: Iterator>(items: I) where I::Item: std::fmt::Display`. Tests trait-bound mechanics on associated types."
+}

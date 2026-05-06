@@ -1,0 +1,15 @@
+{
+  "id": "issue_006",
+  "sub_eval": "issue",
+  "task_prompt": "There's a logic bug in `count_vowels` in `src/lib.rs`. It claims to count vowels (a, e, i, o, u — case-insensitive) but a test case shows it's counting the wrong character set. Fix it so the existing tests pass. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "/// Counts the number of vowels (a, e, i, o, u — case-insensitive) in a string.\npub fn count_vowels(s: &str) -> usize {\n    s.chars()\n        .filter(|c| matches!(c, 'a' | 'e' | 'o' | 'u' | 'y'))\n        .count()\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn counts_basic_vowels() {\n        assert_eq!(count_vowels(\"hello\"), 2);\n        assert_eq!(count_vowels(\"rhythm\"), 0);\n        assert_eq!(count_vowels(\"AEIOU\"), 5);\n        assert_eq!(count_vowels(\"\"), 0);\n        assert_eq!(count_vowels(\"sky\"), 0);\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Two bugs: (1) 'i' missing, 'y' wrongly included; (2) case-insensitivity not implemented (AEIOU should count). Fix needs `to_ascii_lowercase()` per char + correct set {a,e,i,o,u}. Tests model's ability to read failing tests + reason about what assertions reveal.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}

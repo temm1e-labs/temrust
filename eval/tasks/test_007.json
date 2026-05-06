@@ -1,0 +1,11 @@
+{
+  "id": "test_007",
+  "sub_eval": "test",
+  "task_prompt": "Add a `#[test]` block at the bottom of this file that exercises `parse_kv` thoroughly. Tests must pass with `cargo test`. Cover: a normal `key=value` input, multiple comma-separated pairs, an input with whitespace around keys/values that should be trimmed, an empty input string (returns empty map), and a malformed input lacking `=` (returns Err). Return the complete program (existing code + new tests) in a single ```rust code block.",
+  "input_code": "use std::collections::HashMap;\n\n/// Parses a string like \"foo=bar, baz= qux \" into a HashMap.\n/// Whitespace around keys and values is trimmed.\n/// Returns Err if any pair is missing `=`.\npub fn parse_kv(s: &str) -> Result<HashMap<String, String>, String> {\n    let mut out = HashMap::new();\n    if s.trim().is_empty() {\n        return Ok(out);\n    }\n    for pair in s.split(',') {\n        let pair = pair.trim();\n        let (k, v) = pair.split_once('=').ok_or_else(|| format!(\"missing '=' in pair: {}\", pair))?;\n        out.insert(k.trim().to_string(), v.trim().to_string());\n    }\n    Ok(out)\n}\n\nfn main() {\n    println!(\"{:?}\", parse_kv(\"a=1, b=2\"));\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Tests model's ability to write tests for code with Result-returning APIs and hashmap equality assertions."
+}

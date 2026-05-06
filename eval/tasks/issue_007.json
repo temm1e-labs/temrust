@@ -1,0 +1,15 @@
+{
+  "id": "issue_007",
+  "sub_eval": "issue",
+  "task_prompt": "There's a logic bug in `binary_search` in `src/lib.rs`: it sometimes misses the target or runs forever on certain inputs. Fix it so the existing tests pass. Return the complete corrected `src/lib.rs` in a single ```rust code block.",
+  "input_code": "/// Returns Some(index) if target is in the (sorted ascending) slice, else None.\npub fn binary_search(arr: &[i32], target: i32) -> Option<usize> {\n    let mut lo: usize = 0;\n    let mut hi: usize = arr.len();\n    while lo < hi {\n        let mid = (lo + hi) / 2;\n        if arr[mid] == target {\n            return Some(mid);\n        } else if arr[mid] < target {\n            lo = mid;\n        } else {\n            hi = mid;\n        }\n    }\n    None\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn it_searches() {\n        let v: Vec<i32> = vec![1, 3, 5, 7, 9, 11];\n        assert_eq!(binary_search(&v, 1), Some(0));\n        assert_eq!(binary_search(&v, 11), Some(5));\n        assert_eq!(binary_search(&v, 7), Some(3));\n        assert_eq!(binary_search(&v, 4), None);\n        assert_eq!(binary_search(&v, 12), None);\n        assert_eq!(binary_search(&[], 5), None);\n    }\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code",
+  "notes": "Classic infinite-loop bug in binary search: `lo = mid` (should be `lo = mid + 1`). Tests will hang if not fixed. Also accepts the alternate formulation that uses `hi = mid - 1` with `usize` underflow guards. We add a 60s test timeout via the runner so a hang fails the task.",
+  "extra_files": {
+    "Cargo.toml": "[package]\nname = \"temrust_eval\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[dependencies]\n"
+  },
+  "target_file": "src/lib.rs"
+}
