@@ -228,20 +228,27 @@ def main() -> int:
 
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
+    # transformers 4.55–4.57 regression: Gemma 4's tokenizer_config sets
+    # extra_special_tokens as a list, but _set_model_specific_special_tokens
+    # calls .keys() on it. Coerce to dict so the fast tokenizer can load.
+    # (Slow tokenizer is not an option — Gemma 4 ships only tokenizer.json,
+    # no SentencePiece .model file.)
+    import transformers.tokenization_utils_base as _tub
+    _orig_set_special = _tub.PreTrainedTokenizerBase._set_model_specific_special_tokens
+
+    def _patched_set_special(self, special_tokens):
+        if isinstance(special_tokens, list):
+            special_tokens = {t: None for t in special_tokens}
+        return _orig_set_special(self, special_tokens)
+
+    _tub.PreTrainedTokenizerBase._set_model_specific_special_tokens = _patched_set_special
+
     print("\n=== loading tokenizer ===", flush=True)
     # In skip-train mode, the merged checkpoint at --out has its own
     # tokenizer files (saved during the original train run). Loading from
     # there preserves any tokenizer fixups, special tokens, etc.
     tok_src = args.out if args.skip_train else args.base
-    try:
-        tokenizer = AutoTokenizer.from_pretrained(tok_src, trust_remote_code=True)
-    except AttributeError as e:
-        # transformers 4.55–4.57 regression on Gemma 4: extra_special_tokens
-        # arrives as a list, code calls .keys(). Slow tokenizer dodges the path.
-        if "'list' object has no attribute 'keys'" not in str(e):
-            raise
-        print("  fast tokenizer hit known regression, falling back to slow", flush=True)
-        tokenizer = AutoTokenizer.from_pretrained(tok_src, trust_remote_code=True, use_fast=False)
+    tokenizer = AutoTokenizer.from_pretrained(tok_src, trust_remote_code=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
