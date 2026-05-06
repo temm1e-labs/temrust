@@ -1,0 +1,11 @@
+{
+  "id": "issue_013",
+  "sub_eval": "issue",
+  "task_prompt": "Issue: `find_pair` should return Some((i, j)) where `i < j` and `items[i] + items[j] == target`, or None. The current implementation has an off-by-one and a flipped order. Fix it. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "pub fn find_pair(items: &[i32], target: i32) -> Option<(usize, usize)> {\n    for i in 0..=items.len() {\n        for j in 0..i {\n            if items[i] + items[j] == target {\n                return Some((i, j));\n            }\n        }\n    }\n    None\n}\n\nfn main() {\n    println!(\"{:?}\", find_pair(&[1, 2, 3, 4], 5));\n    println!(\"{:?}\", find_pair(&[1, 2, 3, 4], 100));\n    println!(\"{:?}\", find_pair(&[], 0));\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Two bugs: outer loop 0..=items.len() has off-by-one (should be 0..items.len() or even 0..items.len().saturating_sub(1)). Inner loop 0..i pairs (i, j) with j<i; the returned tuple has them flipped (Some((j, i)) is what user expects with i<j). Fix order + bounds."
+}

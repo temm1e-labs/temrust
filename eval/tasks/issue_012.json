@@ -1,0 +1,11 @@
+{
+  "id": "issue_012",
+  "sub_eval": "issue",
+  "task_prompt": "Issue: `apply_discount` should apply the discount as a percentage (0.0 to 100.0). It currently treats the discount as a raw fraction and silently allows discounts > 100% or < 0%, producing nonsensical prices. Fix it to: (1) reject invalid discount with Result<f64, String>, (2) treat discount as a percentage. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "pub fn apply_discount(price: f64, discount: f64) -> f64 {\n    price - (price * discount)\n}\n\nfn main() {\n    println!(\"{}\", apply_discount(100.0, 25.0));\n    println!(\"{}\", apply_discount(50.0, 0.0));\n    println!(\"{}\", apply_discount(80.0, 10.0));\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Return Result. Reject discount outside [0, 100]. Multiply by (discount / 100.0). main should print Results — likely uses .unwrap()."
+}

@@ -1,0 +1,11 @@
+{
+  "id": "borrow_014",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow-checker error using interior mutability. The Counter struct should support `increment` through a shared reference (`&self`, not `&mut self`). Return the complete corrected program in a single ```rust code block.",
+  "input_code": "struct Counter {\n    n: i32,\n}\n\nimpl Counter {\n    fn new() -> Self { Counter { n: 0 } }\n    fn increment(&self) { self.n += 1; }\n    fn get(&self) -> i32 { self.n }\n}\n\nfn main() {\n    let c = Counter::new();\n    c.increment();\n    c.increment();\n    c.increment();\n    println!(\"{}\", c.get());\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Cannot mutate self.n through &self. Fix: wrap n in Cell<i32> (since i32 is Copy). Use self.n.set(self.n.get() + 1) and self.n.get()."
+}

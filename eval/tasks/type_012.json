@@ -1,0 +1,11 @@
+{
+  "id": "type_012",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type/trait errors. The `Sum` trait should let any iterator of `i32` produce a sum, and we provide a blanket impl. The current code fails to compile because of trait coherence + ambiguity issues. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "trait Sum {\n    fn sum_all(self) -> i32;\n}\n\nimpl<I: Iterator<Item = i32>> Sum for I {\n    fn sum_all(self) -> i32 {\n        self.fold(0, |a, b| a + b)\n    }\n}\n\nfn main() {\n    let v = vec![1, 2, 3, 4];\n    let s = v.iter().sum_all();\n    println!(\"{}\", s);\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "v.iter() yields &i32, not i32. Either change blanket impl to handle &i32 (e.g., Item: Borrow<i32> or Copy) or change call site to v.into_iter() / v.iter().copied(). Simplest: v.iter().copied().sum_all()."
+}

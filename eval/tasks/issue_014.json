@@ -1,0 +1,11 @@
+{
+  "id": "issue_014",
+  "sub_eval": "issue",
+  "task_prompt": "Issue: `Logger::log` should append a timestamped line to the log buffer. Currently it crashes on the first call because of an unchecked `unwrap`. Fix it so the logger works deterministically without depending on system time — accept the timestamp as a parameter. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "pub struct Logger {\n    buf: Vec<String>,\n}\n\nimpl Logger {\n    pub fn new() -> Self { Logger { buf: vec![] } }\n    pub fn log(&mut self, msg: &str) {\n        let ts = std::time::SystemTime::now()\n            .duration_since(std::time::UNIX_EPOCH)\n            .unwrap()\n            .as_secs();\n        self.buf.push(format!(\"[{}] {}\", ts, msg));\n    }\n    pub fn lines(&self) -> &[String] { &self.buf }\n}\n\nfn main() {\n    let mut l = Logger::new();\n    l.log(\"hello\");\n    l.log(\"world\");\n    for line in l.lines() {\n        println!(\"{}\", line);\n    }\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Refactor: log() takes an additional `ts: u64` parameter (or u128 etc). Update main to pass timestamps explicitly. Removes the unwrap entirely."
+}

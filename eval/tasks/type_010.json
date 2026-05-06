@@ -1,0 +1,11 @@
+{
+  "id": "type_010",
+  "sub_eval": "type",
+  "task_prompt": "Fix the trait/type errors. The function should accept any type implementing `Display + Clone` and return a vec of N clones of it formatted as String. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "use std::fmt::Display;\n\nfn n_clones_of<T>(x: T, n: usize) -> Vec<String> {\n    let mut out = Vec::new();\n    for _ in 0..n {\n        out.push(format!(\"{}\", x.clone()));\n    }\n    out\n}\n\nfn main() {\n    println!(\"{:?}\", n_clones_of(\"hi\", 3));\n    println!(\"{:?}\", n_clones_of(42, 2));\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Missing trait bounds: `T: Display + Clone`. Easy fix."
+}

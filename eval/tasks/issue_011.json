@@ -1,0 +1,11 @@
+{
+  "id": "issue_011",
+  "sub_eval": "issue",
+  "task_prompt": "Issue: the iterator-based `n_smallest` is supposed to return the n smallest elements in ascending order. It currently returns them but in arbitrary order, and panics if n > len. Fix it: return at most `min(n, items.len())` elements in sorted ascending order. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "pub fn n_smallest(items: Vec<i32>, n: usize) -> Vec<i32> {\n    let mut sorted = items;\n    sorted.sort();\n    sorted[..n].to_vec()\n}\n\nfn main() {\n    println!(\"{:?}\", n_smallest(vec![5, 1, 4, 2, 3], 3));\n    println!(\"{:?}\", n_smallest(vec![5, 1], 10));\n    println!(\"{:?}\", n_smallest(vec![], 0));\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "The slice [..n] panics when n > len. Fix: clamp n with .min(sorted.len()). Then sorted[..n.min(sorted.len())].to_vec() or split_at."
+}

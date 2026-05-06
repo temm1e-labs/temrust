@@ -1,0 +1,11 @@
+{
+  "id": "issue_010",
+  "sub_eval": "issue",
+  "task_prompt": "Issue: `parse_duration` is meant to accept strings like \"5s\", \"100ms\", \"2m\" and return a `std::time::Duration`. Currently it only handles integer seconds and panics on anything else. Fix the function to support \"ms\" (milliseconds), \"s\" (seconds), and \"m\" (minutes), returning Result<Duration, String>. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "use std::time::Duration;\n\npub fn parse_duration(s: &str) -> Duration {\n    let n: u64 = s.trim_end_matches('s').parse().unwrap();\n    Duration::from_secs(n)\n}\n\nfn main() {\n    println!(\"{:?}\", parse_duration(\"5s\"));\n    println!(\"{:?}\", parse_duration(\"100ms\"));\n    println!(\"{:?}\", parse_duration(\"2m\"));\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Must change return type to Result<Duration, String>, dispatch on suffix (longer 'ms' first), use Duration::from_millis/secs and seconds * 60 for minutes. main must also be updated to unwrap or print Results."
+}

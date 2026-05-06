@@ -1,0 +1,11 @@
+{
+  "id": "test_011",
+  "sub_eval": "test",
+  "task_prompt": "Add `#[test]` blocks testing `Stack<T>`. Use a stack of i32 in tests. Cover: (1) new stack is empty, len=0, (2) push then pop returns the same value, (3) pop on empty returns None, (4) peek does not consume, (5) len reflects pushes and pops correctly. Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "#[derive(Debug)]\npub struct Stack<T> {\n    items: Vec<T>,\n}\n\nimpl<T> Stack<T> {\n    pub fn new() -> Self { Stack { items: Vec::new() } }\n    pub fn push(&mut self, v: T) { self.items.push(v); }\n    pub fn pop(&mut self) -> Option<T> { self.items.pop() }\n    pub fn peek(&self) -> Option<&T> { self.items.last() }\n    pub fn len(&self) -> usize { self.items.len() }\n    pub fn is_empty(&self) -> bool { self.items.is_empty() }\n}\n\nfn main() {\n    let mut s: Stack<i32> = Stack::new();\n    s.push(1);\n    s.push(2);\n    println!(\"{:?}\", s.pop());\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Generic struct; tests must instantiate with a concrete type and exercise the API contract."
+}

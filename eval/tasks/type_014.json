@@ -1,0 +1,11 @@
+{
+  "id": "type_014",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type/trait errors. The `Encode` trait should let us encode any printable type into a string with a prefix. The current `Box<dyn Encode>` use site fails because Encode isn't object-safe. Refactor so the use case works (you can keep dyn dispatch by making Encode object-safe, or switch to a different abstraction). Return the complete corrected program in a single ```rust code block.",
+  "input_code": "use std::fmt::Display;\n\ntrait Encode {\n    fn encode_with<T: Display>(&self, x: T) -> String;\n}\n\nstruct Prefix(String);\n\nimpl Encode for Prefix {\n    fn encode_with<T: Display>(&self, x: T) -> String {\n        format!(\"{}: {}\", self.0, x)\n    }\n}\n\nfn main() {\n    let encoders: Vec<Box<dyn Encode>> = vec![\n        Box::new(Prefix(\"v\".into())),\n    ];\n    for e in &encoders {\n        println!(\"{}\", e.encode_with(42));\n    }\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "hard",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Generic method on trait makes it not object-safe. Fix options: (a) take &dyn Display instead of generic T, (b) split into two traits (one object-safe), (c) switch to enum dispatch. Cleanest: change signature to `fn encode_with(&self, x: &dyn Display) -> String;` and pass `&42` etc."
+}

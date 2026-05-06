@@ -1,0 +1,11 @@
+{
+  "id": "borrow_011",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow-checker error. The function should split a `&mut Vec<i32>` into two non-overlapping mutable slices and double the elements in each. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn double_halves(v: &mut Vec<i32>) {\n    let mid = v.len() / 2;\n    let left = &mut v[..mid];\n    let right = &mut v[mid..];\n    for x in left.iter_mut() { *x *= 2; }\n    for x in right.iter_mut() { *x *= 2; }\n}\n\nfn main() {\n    let mut v = vec![1, 2, 3, 4, 5, 6];\n    double_halves(&mut v);\n    println!(\"{:?}\", v);\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "hard",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Two simultaneous &mut into the same Vec via indexing is rejected. Fix: use split_at_mut(mid) which returns (&mut [T], &mut [T])."
+}

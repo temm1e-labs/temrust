@@ -1,0 +1,11 @@
+{
+  "id": "borrow_015",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the lifetime error. The function should return a sub-slice of the input matching the longest prefix of equal elements. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn first_run(items: &[i32]) -> &[i32] {\n    if items.is_empty() {\n        return &items[..0];\n    }\n    let head = items[0];\n    let mut end = 1;\n    while end < items.len() && items[end] == head {\n        end += 1;\n    }\n    &items[..end]\n}\n\nfn main() {\n    let v = vec![5, 5, 5, 7, 5];\n    println!(\"{:?}\", first_run(&v));\n    println!(\"{:?}\", first_run(&[]));\n    println!(\"{:?}\", first_run(&[1, 2, 2, 2]));\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Actually compiles fine — this is testing whether the model preserves correct code. Listed as 'easy' to provide a positive control among the harder tasks."
+}

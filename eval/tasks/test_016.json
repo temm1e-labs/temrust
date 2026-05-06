@@ -1,0 +1,11 @@
+{
+  "id": "test_016",
+  "sub_eval": "test",
+  "task_prompt": "Add tests for `RingBuffer<T>` (fixed-size FIFO). Cover: (1) empty buffer pop returns None, (2) push fills capacity then refuses (returns Err on overflow), (3) push then pop returns FIFO order, (4) buffer wraps correctly when filled and partially drained, (5) len reflects current contents. Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "pub struct RingBuffer<T> {\n    items: Vec<Option<T>>,\n    head: usize,\n    tail: usize,\n    len: usize,\n    cap: usize,\n}\n\nimpl<T> RingBuffer<T> {\n    pub fn new(cap: usize) -> Self {\n        let mut items = Vec::with_capacity(cap);\n        for _ in 0..cap { items.push(None); }\n        RingBuffer { items, head: 0, tail: 0, len: 0, cap }\n    }\n    pub fn push(&mut self, v: T) -> Result<(), T> {\n        if self.len == self.cap { return Err(v); }\n        self.items[self.tail] = Some(v);\n        self.tail = (self.tail + 1) % self.cap;\n        self.len += 1;\n        Ok(())\n    }\n    pub fn pop(&mut self) -> Option<T> {\n        if self.len == 0 { return None; }\n        let v = self.items[self.head].take();\n        self.head = (self.head + 1) % self.cap;\n        self.len -= 1;\n        v\n    }\n    pub fn len(&self) -> usize { self.len }\n}\n\nfn main() {\n    let mut rb: RingBuffer<i32> = RingBuffer::new(3);\n    rb.push(1).unwrap();\n    rb.push(2).unwrap();\n    println!(\"{:?}\", rb.pop());\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "hard",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Stateful generic data structure. Wrap-around case (5) is the trickiest — tests must push to capacity, drain a few, push again to wrap, then verify FIFO order across the wrap boundary."
+}

@@ -1,0 +1,11 @@
+{
+  "id": "borrow_013",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow-checker / lifetime errors. The function takes an iterator over `&str` and returns the longest one. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "fn longest<'a, I: Iterator<Item = &str>>(it: I) -> Option<&str> {\n    it.max_by_key(|s| s.len())\n}\n\nfn main() {\n    let v = vec![\"a\", \"longer\", \"longest\", \"bb\"];\n    println!(\"{:?}\", longest(v.iter().copied()));\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "hard",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "&str without explicit lifetime in generic bound is ambiguous; lifetime 'a is declared but not used. Fix: `fn longest<'a, I: Iterator<Item = &'a str>>(it: I) -> Option<&'a str>`."
+}

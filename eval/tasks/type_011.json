@@ -1,0 +1,11 @@
+{
+  "id": "type_011",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type errors in this trait + impl. The `Container` trait should expose an associated type `Item` and methods to push and pop. Implement it for `Stack` (a wrapper around `Vec<i32>`). Return the complete corrected program in a single ```rust code block.",
+  "input_code": "trait Container {\n    type Item;\n    fn push(&mut self, item: Self);\n    fn pop(&mut self) -> Option<Self>;\n}\n\nstruct Stack {\n    inner: Vec<i32>,\n}\n\nimpl Container for Stack {\n    type Item = i32;\n    fn push(&mut self, item: i32) {\n        self.inner.push(item);\n    }\n    fn pop(&mut self) -> Option<i32> {\n        self.inner.pop()\n    }\n}\n\nfn main() {\n    let mut s = Stack { inner: vec![] };\n    s.push(1);\n    s.push(2);\n    println!(\"{:?}\", s.pop());\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Trait declares `push(&mut self, item: Self)` and `Option<Self>` but should be `Self::Item`. Fix: use `Self::Item` in trait method signatures."
+}

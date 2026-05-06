@@ -1,0 +1,11 @@
+{
+  "id": "test_012",
+  "sub_eval": "test",
+  "task_prompt": "Add tests for `divide`. Use `#[should_panic(expected = \"...\")]` to verify that divide-by-zero panics with the right message, AND a normal `#[test]` for the happy path (e.g. 10/2 == 5, 9/3 == 3, -6/2 == -3). Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "pub fn divide(a: i32, b: i32) -> i32 {\n    if b == 0 {\n        panic!(\"divide by zero\");\n    }\n    a / b\n}\n\nfn main() {\n    println!(\"{}\", divide(10, 2));\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Tests `#[should_panic(expected = \"divide by zero\")]` and a normal `#[test]` with assertion."
+}

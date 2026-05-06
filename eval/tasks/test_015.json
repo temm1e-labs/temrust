@@ -1,0 +1,11 @@
+{
+  "id": "test_015",
+  "sub_eval": "test",
+  "task_prompt": "Add tests for `safe_divide` that uses `?` operator and Result. Each test should be defined as `fn name() -> Result<(), String>` (note the Result return type for tests) and use `?` to propagate. Cover: (1) successful division, (2) divide by zero error case (should NOT use ? — assert the Err), (3) chained divisions where one fails. Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "pub fn safe_divide(a: i32, b: i32) -> Result<i32, String> {\n    if b == 0 { Err(\"divide by zero\".into()) } else { Ok(a / b) }\n}\n\nfn main() {\n    println!(\"{:?}\", safe_divide(10, 2));\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "hard",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Tests use `-> Result<(), String>` return type, `?` operator. Demonstrates idiomatic Rust testing of Result-returning functions."
+}

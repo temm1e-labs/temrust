@@ -1,0 +1,11 @@
+{
+  "id": "borrow_012",
+  "sub_eval": "borrow",
+  "task_prompt": "Fix the borrow-checker error. The function should look up a key in a HashMap and insert a default value if missing, then mutate the value to add 1. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "use std::collections::HashMap;\n\nfn bump(map: &mut HashMap<String, i32>, key: String) {\n    if let Some(v) = map.get(&key) {\n        let new_val = v + 1;\n        map.insert(key, new_val);\n    } else {\n        map.insert(key, 1);\n    }\n}\n\nfn main() {\n    let mut m = HashMap::new();\n    bump(&mut m, \"a\".into());\n    bump(&mut m, \"a\".into());\n    bump(&mut m, \"b\".into());\n    println!(\"{:?}\", m);\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "The `if let Some(v)` holds an immutable borrow on map; calling map.insert inside is rejected (NLL helps but key is also captured). Idiomatic fix: use `map.entry(key).and_modify(|v| *v += 1).or_insert(1)`."
+}

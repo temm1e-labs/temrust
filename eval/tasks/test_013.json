@@ -1,0 +1,11 @@
+{
+  "id": "test_013",
+  "sub_eval": "test",
+  "task_prompt": "Add property-style tests for `gcd` (greatest common divisor) without using any external crate. Test (1) gcd(a, 0) == a for several a > 0, (2) gcd(a, b) == gcd(b, a) for several pairs, (3) gcd(a, b) divides both a and b, for several pairs, (4) gcd(a*k, b*k) == k * gcd(a, b) for several. Use a small inline list of test inputs (no proptest crate). Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "pub fn gcd(a: u64, b: u64) -> u64 {\n    if b == 0 { a } else { gcd(b, a % b) }\n}\n\nfn main() {\n    println!(\"{}\", gcd(48, 18));\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "hard",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Property-style: each test case iterates over a small list of pairs and asserts the property. No external crate required."
+}

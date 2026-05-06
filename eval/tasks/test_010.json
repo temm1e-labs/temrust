@@ -1,0 +1,11 @@
+{
+  "id": "test_010",
+  "sub_eval": "test",
+  "task_prompt": "Add a `#[test]` block testing `binary_search`. Cover: (1) target found in middle, (2) target found at first index, (3) target found at last index, (4) target not in array (returns None), (5) empty array (returns None), (6) target less than all elements, (7) target greater than all elements. Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "pub fn binary_search(arr: &[i32], target: i32) -> Option<usize> {\n    let (mut lo, mut hi) = (0usize, arr.len());\n    while lo < hi {\n        let mid = lo + (hi - lo) / 2;\n        if arr[mid] == target { return Some(mid); }\n        else if arr[mid] < target { lo = mid + 1; }\n        else { hi = mid; }\n    }\n    None\n}\n\nfn main() {\n    println!(\"{:?}\", binary_search(&[1, 3, 5, 7, 9], 5));\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "medium",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Pure-function with multiple boundary conditions. Tests must explicitly cover each enumerated case; weak coverage will pass cargo test but is the wrong kind of pass — the task spec is the rubric."
+}

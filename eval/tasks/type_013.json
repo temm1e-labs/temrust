@@ -1,0 +1,11 @@
+{
+  "id": "type_013",
+  "sub_eval": "type",
+  "task_prompt": "Fix the type errors. The function `boxed_print` should accept any boxed type that implements Display and print it. Return the complete corrected program in a single ```rust code block.",
+  "input_code": "use std::fmt::Display;\n\nfn boxed_print(b: Box<dyn Display>) {\n    println!(\"{}\", b);\n}\n\nfn main() {\n    let things: Vec<Box<dyn Display>> = vec![\n        Box::new(\"hello\"),\n        Box::new(42),\n        Box::new(3.14),\n    ];\n    for t in things {\n        boxed_print(t);\n    }\n}\n",
+  "verifier_cmd": "cargo run",
+  "expected_outcome": "runs",
+  "difficulty": "easy",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Actually compiles fine — listed as a positive control among harder tasks."
+}

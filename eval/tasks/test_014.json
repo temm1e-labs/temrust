@@ -1,0 +1,11 @@
+{
+  "id": "test_014",
+  "sub_eval": "test",
+  "task_prompt": "Add tests for the `Drop` impl on `Resource`. Use a `Cell<i32>` static counter (or a thread_local!) that the Drop impl increments, and assert that creating a Resource then letting it drop increments the counter exactly once. Return the complete program (existing code + tests) in a single ```rust code block.",
+  "input_code": "use std::cell::Cell;\n\nthread_local! {\n    pub static DROP_COUNT: Cell<i32> = Cell::new(0);\n}\n\npub struct Resource {\n    pub id: i32,\n}\n\nimpl Drop for Resource {\n    fn drop(&mut self) {\n        DROP_COUNT.with(|c| c.set(c.get() + 1));\n    }\n}\n\nfn main() {\n    let _r = Resource { id: 1 };\n}\n",
+  "verifier_cmd": "cargo test",
+  "expected_outcome": "tests_pass",
+  "difficulty": "hard",
+  "source": "hand-curated by Claude Code (extended bench)",
+  "notes": "Tests must reset DROP_COUNT, create + drop a Resource (in a scope), then check the counter incremented by 1. Care: tests share the thread_local; use sub-scopes."
+}
