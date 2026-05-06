@@ -119,7 +119,7 @@ def serve(args, tokenizer, model):
     device = next(model.parameters()).device
 
     app = FastAPI()
-    served_name = "tem-rust-v5"
+    served_name = args.served_name
 
     @app.get("/v1/models")
     def list_models():
@@ -147,7 +147,7 @@ def serve(args, tokenizer, model):
         gen_tokens = out[0][inputs["input_ids"].shape[1]:]
         text = tokenizer.decode(gen_tokens, skip_special_tokens=True)
         return JSONResponse({
-            "id": "chatcmpl-tem-rust-v5",
+            "id": f"chatcmpl-{served_name}",
             "object": "chat.completion",
             "model": served_name,
             "choices": [{
@@ -182,7 +182,7 @@ def serve(args, tokenizer, model):
                 text = text.split(s)[0]
                 break
         return JSONResponse({
-            "id": "cmpl-tem-rust-v5",
+            "id": f"cmpl-{served_name}",
             "object": "text_completion",
             "model": served_name,
             "choices": [{"index": 0, "text": text, "finish_reason": "stop"}],
@@ -213,6 +213,8 @@ def main() -> int:
                     help="After training+merge, start a FastAPI server on :8000.")
     ap.add_argument("--skip-train", action="store_true",
                     help="Skip training; load --out as a pre-trained model and serve.")
+    ap.add_argument("--served-name", default="tem-rust-v5",
+                    help="Model id surfaced via /v1/models. Defaults to tem-rust-v5.")
     args = ap.parse_args()
 
     print(f"=== Tem-Rust v5 SFT ===", flush=True)
