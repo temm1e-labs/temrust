@@ -87,12 +87,22 @@ def train(args, tokenizer, model):
 
     n_steps = (len(ds) + (args.batch_size * args.grad_accum) - 1) // (args.batch_size * args.grad_accum) * args.epochs
     print(f"\n=== training (~{n_steps} steps over {args.epochs} epochs) ===", flush=True)
-    trainer = SFTTrainer(
-        model=model,
-        args=sft_cfg,
-        train_dataset=ds,
-        tokenizer=tokenizer,
-    )
+    # trl 1.x renamed `tokenizer=` to `processing_class=`. Try the new
+    # name first; fall back for trl 0.x (used by v5/v6 launchers).
+    try:
+        trainer = SFTTrainer(
+            model=model,
+            args=sft_cfg,
+            train_dataset=ds,
+            processing_class=tokenizer,
+        )
+    except TypeError:
+        trainer = SFTTrainer(
+            model=model,
+            args=sft_cfg,
+            train_dataset=ds,
+            tokenizer=tokenizer,
+        )
     trainer.train()
 
     print("\n=== merging LoRA into base + saving ===", flush=True)
