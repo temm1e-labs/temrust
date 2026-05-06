@@ -67,3 +67,9 @@ User asked to be told when running out of quota. Triggers:
 | 2026-05-06 | 1 | Together H100 endpoint `endpoint-6c994e78-...` for v4 eval (created 03:50:34Z → STOPPED 03:55:42Z = 5.1 min) | 0.085h | $3.99/hr | $0.34 | **$34.77** |
 | | | | | | | |
 | **End of session reconciliation (2026-05-06):** | | Total **~$33.77 / ~$100 (33.8%, after Together top-up)**. Results: v0=32.4%, v1=29.7%, v2=51.4%, v3=54.1%, **v4=54.1%** (tied v3 — borrow +1, test −1). 1.7B ceiling appears at ~55%. | | | | |
+| 2026-05-06 | 2 | v5 RunPod RTX 5090 SECURE (61 min) — FAILED, opaque silent crash (no log access, transformers/torch import bug not visible) | 1.017h | $0.99/hr | $1.01 | **$34.78** |
+| 2026-05-06 | 2 | v5 RunPod H100 SXM5 attempts 2-5 (4 fast-fail iterations, ~9 min total) — caught by embedded http.server log server: pin transformers, pin trl, add rich, fix OOM | 0.150h | $3.49/hr | $0.51 | **$35.29** |
+| 2026-05-06 | 2 | v5 RunPod H100 SXM5 v6 (25 min) — training SUCCEEDED but eval got 0/37 due to FastAPI server bug (`req: Request` annotation misinterpreted as query param) | 0.417h | $3.49/hr | $1.45 | **$36.74** |
+| 2026-05-06 | 2 | v5 RunPod H100 SXM5 v7 (30 min) — training + serving + eval **SUCCESS: 23/37 = 62.2%** with Qwen2.5-Coder-1.5B-Instruct base (`hf8x39e7cmbidw` superseded by `0wqhj6hl65talx`) | 0.500h | $3.49/hr | $1.75 | **$38.49** |
+| | | | | | | |
+| **End of v5 reconciliation (2026-05-06):** | | Total **~$38.49 / ~$100 (38.5%)**. **NEW BEST: v5 = 23/37 = 62.2%** with Qwen2.5-Coder-1.5B-Instruct + same v4 SFT mix on RunPod H100 DIY. The 1.7B chat-base ceiling is broken — Coder pretraining matters more than ~200M extra params here. | | | | |

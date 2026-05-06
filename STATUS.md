@@ -1,24 +1,30 @@
 # STATUS
 
-**Last updated:** 2026-05-06 morning by Claude Code (autonomous overnight session)
+**Last updated:** 2026-05-06 afternoon by Claude Code (continuation session — v5 Coder base swap)
 
 ## Current state
 
-**Phase:** **Phase 0 — done. Phase 1 (training pipeline) — proof-of-pipeline v0 trained, evaluated, retired.**
+**Phase:** **Phase 1 (training pipeline) — v5 SHIPPED at 62.2%, new best. RunPod DIY pipeline locked.**
 **Plan version:** v2 zero-risk, $75 actual funding ($50 RunPod + $25 Together)
 
-**Authorisation:** "just do it im lazy" + "keep going until done" + "i will go to sleep, keep doing until done. Use your best judgement." + "do until done i expect TemRust model ready by morning with full reports and benchmark"
+**Authorisation:** "just do it im lazy" + "keep going until done" + "do until done i expect TemRust model ready by morning with full reports and benchmark" + "I think we should try finetuning qwen coder on runpod because it has a higher base" + "If fail investigate i want v5 use h100 to speed up if needed"
 
-## Morning of 2026-05-06 outcome
+## Morning of 2026-05-06 outcome (v0–v4 on Qwen3-1.7B chat base)
 
 - **v0 (diff SFT, 76 ex, 9 steps):** 12/37 = 32.4% — regression
 - **v1 (whole-file SFT, 79 ex, 9 steps):** 11/37 = 29.7% — regression. Controlled experiment: format isn't the bottleneck.
 - **v2 (chat base + whole-file SFT, 176 ex, 220 steps):** 19/37 = 51.4% — first to beat base.
 - **v3 (chat base + whole-file SFT, 263 ex, 330 steps):** 20/37 = 54.1% — diminishing returns confirmed.
-- **v4 (chat base + 263 PR + 41 synth-test + 51 synth-borrow, LoRA r=32, 230 steps):** **20/37 = 54.1%** — tied v3 (borrow +1 from synthetic archetypes; test −1, synthetic teacher tests didn't transfer).
-- 1.7B ceiling on this benchmark appears to be ~55%. Next leap requires a bigger base (Qwen2.5-3B-Instruct).
-- All five dedicated endpoints confirmed STOPPED.
-- Total session spend: **~$33.77 / ~$100.00 (33.8%, after Together top-up)**.
+- **v4 (chat base + 263 PR + 41 synth-test + 51 synth-borrow, LoRA r=32, 230 steps):** 20/37 = 54.1% — tied v3 (borrow +1 from synthetic archetypes; test −1, synthetic teacher tests didn't transfer).
+- All five Together dedicated endpoints confirmed STOPPED.
+
+## Afternoon of 2026-05-06 outcome (v5 — base swap to Qwen2.5-Coder-1.5B-Instruct)
+
+- **v5 (Qwen2.5-Coder-1.5B-Instruct + LoRA r=32, same v4 355-row SFT mix, 285 effective steps, RunPod H100 DIY):** **23/37 = 62.2% — NEW BEST.** Per-category: borrow 6/10 (+1 vs v4), issue 6/9 (−2), test 5/9 (+2), type 6/9 (+2). +3 tasks / +8.1 pp over v4 with 200M FEWER params.
+- **The 1.7B chat-base "ceiling" is broken.** It was an artefact of the chat base's instruction-following bias on issue tasks — Coder pretraining transfers better to type/test/borrow at this size class.
+- **RunPod DIY pipeline locked.** 7 attempts: v1 5090 silent (61 min, $1.01, killed), v2-v5 H100 fast-fail iterations (~$0.50 total), v6 H100 trained but FastAPI server bug (broke 0/37 eval, $1.45), v7 H100 fixed and shipped ($1.74). Total v5 spend ~$4.71. **Decisive engineering win**: embedded `python -m http.server :8001` log server in dockerStartCmd let us read `setup.log` over the public proxy — without it we'd have iterated blind.
+- Pinned working stack: `transformers==4.45.2 peft==0.13.2 trl==0.11.4 accelerate==1.0.1 datasets==3.0.2 rich>=13 sentencepiece protobuf fastapi uvicorn` on `runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04`.
+- Total session spend: **~$38.49 / ~$100.00 (38.5%, after Together top-up)**.
 
 ## Phase 0 progress (2026-05-05 → 2026-05-06)
 
@@ -36,8 +42,21 @@
 |---|---|---|---|
 | Qwen/Qwen3-Coder-Next-FP8 | 14/22 (older n=22) | 88.9% pre-fix | Together AI serverless |
 | deepseek-ai/DeepSeek-V3.1 | 5/7 (older n=7) | 71.4% | Together AI serverless |
-| **Qwen/Qwen3-1.7B (broken methodology)** | 10/37 | 27.0% | thinking truncated |
-| **Qwen/Qwen3-1.7B (FIXED methodology)** | **13/37** | **35.1%** | RTX 5090, 16K ctx, max_tokens 8192 |
+| Qwen/Qwen3-1.7B (broken methodology) | 10/37 | 27.0% | thinking truncated |
+| Qwen/Qwen3-1.7B (FIXED methodology) | 13/37 | 35.1% | RTX 5090, 16K ctx, max_tokens 8192 |
+| Qwen/Qwen2.5-Coder-1.5B-Instruct | 19/37 | 51.4% | RTX 5090 — **v5 base** |
+| Qwen/Qwen2.5-Coder-3B-Instruct | 27/37 | 73.0% | RTX 5090 — next bar to beat |
+
+## Tem-Rust models trained (TemRust-* n=37)
+
+| Version | Base | Pass | Rate | Provider | Notes |
+|---|---|---|---|---|---|
+| v0 | Qwen3-1.7B-Base | 12/37 | 32.4% | Together H100 | diff SFT, 9 steps |
+| v1 | Qwen3-1.7B-Base | 11/37 | 29.7% | Together H100 | whole-file SFT, 9 steps |
+| v2 | Qwen3-1.7B (chat) | 19/37 | 51.4% | Together H100 | first to beat base, 220 steps |
+| v3 | Qwen3-1.7B (chat) | 20/37 | 54.1% | Together H100 | 263 ex, 330 steps |
+| v4 | Qwen3-1.7B (chat) | 20/37 | 54.1% | Together H100 | 355 ex (v3 + 92 synthetic), r=32, 230 steps |
+| **v5** | **Qwen2.5-Coder-1.5B-Instruct** | **23/37** | **62.2%** | **RunPod H100 DIY** | **NEW BEST**, same 355 ex as v4, r=32, 285 steps |
 
 ## Setup completed
 - [x] All 4 credentials saved to ~/.config/temllm/ (chmod 600)
