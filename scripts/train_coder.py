@@ -50,10 +50,21 @@ def train(args, tokenizer, model):
     from trl import SFTConfig, SFTTrainer
 
     print("\n=== applying LoRA ===", flush=True)
+    # Gemma 4 wraps each projection in Gemma4ClippableLinear; peft only
+    # adapts plain nn.Linear, so target the inner `.linear` submodule.
+    # Other architectures (Qwen, Mistral, Llama) expose nn.Linear directly.
+    is_gemma4 = getattr(model.config, "model_type", "") == "gemma4"
+    if is_gemma4:
+        target_modules = [
+            "q_proj.linear", "k_proj.linear", "v_proj.linear", "o_proj.linear",
+            "gate_proj.linear", "up_proj.linear", "down_proj.linear",
+        ]
+    else:
+        target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
     lora_cfg = LoraConfig(
         r=args.lora_r,
         lora_alpha=args.lora_alpha,
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        target_modules=target_modules,
         lora_dropout=0.05,
         bias="none",
         task_type="CAUSAL_LM",
