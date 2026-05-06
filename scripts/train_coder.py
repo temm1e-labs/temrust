@@ -76,25 +76,34 @@ def train(args, tokenizer, model):
     ds = load_dataset_for_sft(args.data, tokenizer)
     print(f"  {len(ds)} examples", flush=True)
 
-    sft_cfg = SFTConfig(
-        output_dir=str(Path(args.out).parent / "adapter"),
-        num_train_epochs=args.epochs,
-        per_device_train_batch_size=args.batch_size,
-        gradient_accumulation_steps=args.grad_accum,
-        gradient_checkpointing=args.grad_ckpt,
-        gradient_checkpointing_kwargs={"use_reentrant": False} if args.grad_ckpt else None,
-        learning_rate=args.lr,
-        lr_scheduler_type="cosine",
-        warmup_ratio=0.03,
-        bf16=True,
-        logging_steps=10,
-        save_strategy="no",
-        report_to="none",
-        max_seq_length=args.max_seq_len,
-        dataset_text_field="text",
-        packing=args.packing,
-        optim="adamw_torch",
-    )
+    # trl 1.x renamed max_seq_length → max_length. Detect the supported
+    # kwarg name and pass accordingly so v5/v6 (trl 0.x) and v7 (trl 1.x)
+    # both work.
+    import inspect
+    sft_kwargs = {
+        "output_dir": str(Path(args.out).parent / "adapter"),
+        "num_train_epochs": args.epochs,
+        "per_device_train_batch_size": args.batch_size,
+        "gradient_accumulation_steps": args.grad_accum,
+        "gradient_checkpointing": args.grad_ckpt,
+        "gradient_checkpointing_kwargs": {"use_reentrant": False} if args.grad_ckpt else None,
+        "learning_rate": args.lr,
+        "lr_scheduler_type": "cosine",
+        "warmup_ratio": 0.03,
+        "bf16": True,
+        "logging_steps": 10,
+        "save_strategy": "no",
+        "report_to": "none",
+        "dataset_text_field": "text",
+        "packing": args.packing,
+        "optim": "adamw_torch",
+    }
+    sft_params = inspect.signature(SFTConfig.__init__).parameters
+    if "max_length" in sft_params:
+        sft_kwargs["max_length"] = args.max_seq_len
+    else:
+        sft_kwargs["max_seq_length"] = args.max_seq_len
+    sft_cfg = SFTConfig(**sft_kwargs)
 
     n_steps = (len(ds) + (args.batch_size * args.grad_accum) - 1) // (args.batch_size * args.grad_accum) * args.epochs
     print(f"\n=== training (~{n_steps} steps over {args.epochs} epochs) ===", flush=True)
