@@ -4,7 +4,7 @@
 
 This repository contains the **as-executed pipeline, training data, evaluation harness, and result reports** for **TemRust-SMOL-v5-1.5B**, a fine-tune of `Qwen/Qwen2.5-Coder-1.5B-Instruct` specialized for Rust code: borrow-checker fixes, type-error fixes, test generation, and "fix this issue" tasks.
 
-**Released model:** [`quanduong/TemRust-SMOL-v5-1.5B`](https://huggingface.co/quanduong/TemRust-SMOL-v5-1.5B) on HuggingFace Hub.
+**Released model:** [`nagisanzeninz/TemRust-SMOL-v5-1.5B`](https://huggingface.co/nagisanzeninz/TemRust-SMOL-v5-1.5B) on HuggingFace Hub.
 
 ---
 
@@ -39,9 +39,9 @@ Per-category for **TemRust-SMOL-v5-1.5B**:
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-tok = AutoTokenizer.from_pretrained("quanduong/TemRust-SMOL-v5-1.5B")
+tok = AutoTokenizer.from_pretrained("nagisanzeninz/TemRust-SMOL-v5-1.5B")
 model = AutoModelForCausalLM.from_pretrained(
-    "quanduong/TemRust-SMOL-v5-1.5B",
+    "nagisanzeninz/TemRust-SMOL-v5-1.5B",
     torch_dtype=torch.bfloat16,
     device_map="auto",
 )

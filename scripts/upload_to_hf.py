@@ -228,7 +228,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pod-id", help="If set, fetch /workspace/merged from this pod's :8001 log server.")
     ap.add_argument("--from-local", help="If set, use a pre-staged local directory instead of fetching from pod.")
-    ap.add_argument("--repo-id", required=True, help="HF Hub repo id, e.g. quanduong/TemRust-SMOL-v5-1.5B")
+    ap.add_argument("--repo-id", required=True, help="HF Hub repo id, e.g. nagisanzeninz/TemRust-SMOL-v5-1.5B")
     ap.add_argument("--staging", default="/tmp/tem_rust_upload")
     ap.add_argument("--eval-json", help="Path to eval result JSON for per-category card. Required.")
     ap.add_argument("--private", action="store_true", help="Create private repo on HF Hub.")

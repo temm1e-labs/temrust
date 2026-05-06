@@ -201,4 +201,4 @@ The dominant cost is Together's $4 minimum-charge floor on the v0-v4 fine-tunes 
 
 A 1.5B coder-pretrained base + 355 real PR fixes + LoRA SFT yields a Rust coding specialist scoring 67.6% on a 37-task cargo-graded benchmark for ~$50 of total compute. The dominant lever is base-model pretraining choice, not data scale. Synthetic data has sign-dependent effects driven by structural match to eval shape. Two specialists at the same total parameter budget can substantially outperform one generalist via a `cargo check`-gated ensemble.
 
-The model and pipeline are released under Apache 2.0 at <https://huggingface.co/quanduong/TemRust-SMOL-v5-1.5B> and <https://github.com/temm1e-labs/temrust>.
+The model and pipeline are released under Apache 2.0 at <https://huggingface.co/nagisanzeninz/TemRust-SMOL-v5-1.5B> and <https://github.com/temm1e-labs/temrust>.
