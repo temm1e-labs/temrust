@@ -112,19 +112,19 @@ touch /workspace/setup.log
     git clone "https://${GH_TOKEN}@github.com/temm1e-labs/temrust.git" /workspace/temrust
     cd /workspace/temrust
     echo "[$(date +%H:%M:%S)] repo cloned, starting training"
+    export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
     python scripts/train_coder.py \
         --base Qwen/Qwen2.5-Coder-1.5B-Instruct \
         --data data/clean/sft_wholefile_v4.jsonl \
         --out /workspace/merged \
         --epochs 10 \
-        --batch-size 8 \
-        --grad-accum 1 \
+        --batch-size 4 \
+        --grad-accum 2 \
         --lr 2e-5 \
         --lora-r 32 \
         --lora-alpha 64 \
         --max-seq-len 4096 \
         --packing \
-        --no-grad-ckpt \
         --serve-after-train
     echo "[$(date +%H:%M:%S)] training script exited"
 ) > /workspace/setup.log 2>&1 &
