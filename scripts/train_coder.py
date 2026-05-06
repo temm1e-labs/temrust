@@ -50,15 +50,17 @@ def train(args, tokenizer, model):
     from trl import SFTConfig, SFTTrainer
 
     print("\n=== applying LoRA ===", flush=True)
-    # Gemma 4 wraps each projection in Gemma4ClippableLinear; peft only
-    # adapts plain nn.Linear, so target the inner `.linear` submodule.
-    # Other architectures (Qwen, Mistral, Llama) expose nn.Linear directly.
+    # Gemma 4 is multimodal: text decoder uses plain nn.Linear projections,
+    # but the audio + vision towers wrap theirs in Gemma4ClippableLinear.
+    # SFT loss only flows through text, so adapting wrapped audio/vision
+    # gives grad_norm=0 (gradient never reaches them). Use a regex that
+    # picks only language_model paths, which peft matches via re.fullmatch.
     is_gemma4 = getattr(model.config, "model_type", "") == "gemma4"
     if is_gemma4:
-        target_modules = [
-            "q_proj.linear", "k_proj.linear", "v_proj.linear", "o_proj.linear",
-            "gate_proj.linear", "up_proj.linear", "down_proj.linear",
-        ]
+        target_modules = (
+            r".*language_model\..*\."
+            r"(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj)$"
+        )
     else:
         target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
     lora_cfg = LoraConfig(
