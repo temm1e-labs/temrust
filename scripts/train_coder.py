@@ -111,7 +111,7 @@ def serve(args, tokenizer, model):
     - POST /v1/chat/completions — used by `eval/clients.py:TogetherClient`-style
     - POST /v1/completions — used by `eval/clients.py:TogetherBaseClient`-style
     """
-    from fastapi import FastAPI, Request
+    from fastapi import FastAPI
     from fastapi.responses import JSONResponse
     import uvicorn
 
@@ -125,9 +125,10 @@ def serve(args, tokenizer, model):
     def list_models():
         return {"object": "list", "data": [{"id": served_name, "object": "model"}]}
 
+    # Use `body: dict` rather than `req: Request` — some pinned FastAPI/pydantic
+    # combinations misinterpret the Request annotation as a query-param contract.
     @app.post("/v1/chat/completions")
-    async def chat(req: Request):
-        body = await req.json()
+    async def chat(body: dict):
         messages = body.get("messages", [])
         max_new = int(body.get("max_tokens", 1024))
         temp = float(body.get("temperature", 0.0))
@@ -160,8 +161,7 @@ def serve(args, tokenizer, model):
         })
 
     @app.post("/v1/completions")
-    async def completion(req: Request):
-        body = await req.json()
+    async def completion(body: dict):
         prompt = body.get("prompt", "")
         max_new = int(body.get("max_tokens", 1024))
         temp = float(body.get("temperature", 0.0))
@@ -227,12 +227,16 @@ def main() -> int:
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     print("\n=== loading tokenizer ===", flush=True)
-    tokenizer = AutoTokenizer.from_pretrained(args.base, trust_remote_code=True)
+    # In skip-train mode, the merged checkpoint at --out has its own
+    # tokenizer files (saved during the original train run). Loading from
+    # there preserves any tokenizer fixups, special tokens, etc.
+    tok_src = args.out if args.skip_train else args.base
+    tokenizer = AutoTokenizer.from_pretrained(tok_src, trust_remote_code=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
     if args.skip_train:
-        print("\n=== loading pre-trained merged model ===", flush=True)
+        print(f"\n=== loading pre-trained merged model from {args.out} ===", flush=True)
         merged = AutoModelForCausalLM.from_pretrained(
             args.out, torch_dtype=torch.bfloat16, device_map="auto", trust_remote_code=True,
         )
