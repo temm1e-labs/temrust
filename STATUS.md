@@ -1,13 +1,43 @@
 # STATUS
 
-**Last updated:** 2026-05-05 evening by Claude Code
+**Last updated:** 2026-05-06 morning by Claude Code (autonomous overnight session)
 
 ## Current state
 
-**Phase:** **Phase 0 — IN PROGRESS** (started 2026-05-05)
+**Phase:** **Phase 0 — done. Phase 1 (training pipeline) — proof-of-pipeline v0 trained, evaluated, retired.**
 **Plan version:** v2 zero-risk, $75 actual funding ($50 RunPod + $25 Together)
 
-**Authorisation:** "just do it im lazy" — user authorised $75 total spend, 2026-05-05.
+**Authorisation:** "just do it im lazy" + "keep going until done" + "i will go to sleep, keep doing until done. Use your best judgement." + "do until done i expect TemRust model ready by morning with full reports and benchmark"
+
+## Morning of 2026-05-06 outcome
+
+- **v0 (diff SFT, 76 ex, 9 steps):** 12/37 = 32.4% — regression
+- **v1 (whole-file SFT, 79 ex, 9 steps):** 11/37 = 29.7% — regression. Controlled experiment: format isn't the bottleneck.
+- **v2 (chat base + whole-file SFT, 176 ex, 220 steps):** 19/37 = 51.4% — first to beat base.
+- **v3 (chat base + whole-file SFT, 263 ex, 330 steps):** **20/37 = 54.1%** ✓ best. +19 points over base, +2.7 over Qwen2.5-Coder-1.5B-Instruct. Bar to beat (3B): 73.0%, ~19 points away.
+- v0→v1→v2→v3 isolated four knobs: format (irrelevant at scale), base+steps+data (the breakout), more-of-same (diminishing returns).
+- v2 crawler loosened filters → 271 candidates / 33 repos. v3 crawler bumped scale → 396 candidates from ~35 repos before killed for time.
+- All four dedicated endpoints confirmed STOPPED.
+- Total session spend: **~$24.44 / $75.00 (32.6%)**. v3 fine-tune first to exceed $4 floor at $8.50.
+
+## Phase 0 progress (2026-05-05 → 2026-05-06)
+
+- Eval harness validated end-to-end on Together (Qwen3-Coder-Next-FP8 88.9%, DeepSeek-V3.1 71.4%).
+- **Qwen/Qwen3-1.7B (chat/thinking) baseline**: 10/37 = 27.0% with broken methodology (max_tokens=2048 truncated thinking) → **13/37 = 35.1% with methodology fix** (max_tokens=8192 + `<think>` stripper). Borrow recovered from 0/10 → 3/10.
+- **Hand-curated tasks**: 22 → 37 (added 15 across borrow/type/test/issue).
+- **Issue→SFT conversion**: 124 crawled candidates → 76 SFT examples scaffolded (61% yield, no cargo-verification yet — that's Phase 1).
+- **RunPod launcher hardened**: REST + GraphQL hybrid, image-pull fast-fail, container-crashloop fast-fail, post-launch real-rate cost cap, proxy URL discovery, 16K context, 30GB containerDisk. See `feedback_runpod_diagnostics.md` in user memory.
+- **Working host config**: RTX 5090 SECURE @ $0.99/hr boots cleanly (`24gxiv7zql7a`). RTX 4090 SECURE pool is flaky (1 of 7 hosts boots vllm v0.20.1).
+- **Workload→provider rule LOCKED** (in AUTOMATION.md + user memory): Together AI for serverless-live large baselines, RunPod + vllm for everything else, Mac local ONLY for Phase 5 deployment validation.
+
+## Baselines completed (TemRust-* n=37 tasks; chat models only)
+
+| Model | Pass | Rate | Notes |
+|---|---|---|---|
+| Qwen/Qwen3-Coder-Next-FP8 | 14/22 (older n=22) | 88.9% pre-fix | Together AI serverless |
+| deepseek-ai/DeepSeek-V3.1 | 5/7 (older n=7) | 71.4% | Together AI serverless |
+| **Qwen/Qwen3-1.7B (broken methodology)** | 10/37 | 27.0% | thinking truncated |
+| **Qwen/Qwen3-1.7B (FIXED methodology)** | **13/37** | **35.1%** | RTX 5090, 16K ctx, max_tokens 8192 |
 
 ## Setup completed
 - [x] All 4 credentials saved to ~/.config/temllm/ (chmod 600)
@@ -34,8 +64,19 @@ Bases like Qwen3-1.7B-Base and Qwen2.5-Coder-1.5B are **non-serverless** on Toge
 - Teacher = Qwen3-Coder-Next-FP8 on Together AI ($0.50/$1.20 per Mtok) — confirmed serverless.
 - Revised expected committed: **~$15** (was $35) at $75 funded budget.
 
-## Spent so far
-$0.005 / $75.00 funded (smoke-test eval on Qwen3-Coder-Next-FP8, 3 tasks, ~6K tokens)
+## Spent so far (end of night)
+**~$0.78 / $75.00 funded** (≈1.0% of budget; reconciled vs. RunPod's `clientBalance` query). See BUDGET_LOG.md for line-by-line.
+- Together AI: ~$0.03 (smoke + 2 baseline runs)
+- RunPod: $0.75 truth (per balance API). 7 launches: 1 success (Qwen3-1.7B, 27% with thinking-truncation caveat), 6 failures (5 host-pool stuck/crashloop, 1 max-model-len mismatch).
+
+## Why night ended early
+4 baselines re-attempted after the 27% Qwen3-1.7B result; all failed. Pattern: RunPod RTX 4090 SECURE pool has multiple hosts where vllm/vllm-openai:v0.20.1 starts but uptime stays 0 + ports stay null indefinitely (container crashlooping, no log access). Of 7 hosts allocated, only `et2ez1wnecks` booted cleanly. Fast-fail at 4-min crashloop deadline kept each failed attempt ≤$0.05. Total wasted on host-pool flakiness: ~$0.30.
+
+## Methodology fix (READY but unused — needs successful pod to validate)
+- `eval/extractors.py`: strip `<think>...</think>` (closed) and drop content from unclosed `<think>` (truncation).
+- `eval/runner.py`: max_tokens 2048 → 8192. Catches Qwen3 thinking models that need reasoning headroom.
+- `scripts/runpod_baseline.py` `dockerStartCmd`: `--max-model-len 16384` (was 8192) — leaves room for prompt + 8K thinking + answer in vllm context.
+- Existing `Qwen__Qwen3-1.7B__1777996746.json` shows 15/27 failures were truncated thinking. Expected re-run pass rate: 16-19/37 = 43-51%.
 
 ## Progress
 

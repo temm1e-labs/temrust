@@ -36,6 +36,18 @@ After these are in place, Claude Code can launch GPU instances, train, eval, pus
 
 ---
 
+## Workload → provider rule (LOCKED 2026-05-05)
+
+| Workload | Provider | Why |
+|---|---|---|
+| Baseline other models (live serverless) | **Together AI** | Qwen3-Coder-Next-FP8, DeepSeek-V3.1 — hosted, ~$0.01/baseline |
+| Baseline other models (anything else) | **RunPod + vllm** | Spin up A100/4090 spot, serve, eval, shut down. ~$0.05–0.30/baseline |
+| Train Tem-Rust | **RunPod RTX 4090 spot** | $0.20/hr, Unsloth+QLoRA |
+| Eval our own checkpoints during training | **RunPod + vllm** (same instance) | One pod, two purposes |
+| Local Mac inference | **Phase 5 ONLY** | Final deployment-speed validation. Not for benchmarks. |
+
+Don't pull Ollama models for Phase 0–4 work. Tem-Rust is a thinking model (Qwen3-1.7B-Base lineage); M-series Mac with default Ollama config is too slow + too variable for credible baselines. Use cloud GPUs with vllm for benchmarks.
+
 ## What Claude Code does AUTONOMOUSLY
 
 Within the $500 envelope, Claude Code:
