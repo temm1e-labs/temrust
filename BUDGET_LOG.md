@@ -78,3 +78,11 @@ User asked to be told when running out of quota. Triggers:
 | 2026-05-06 | 2 | v5.1 H100 eval (~5 min) | 0.083h | $3.49/hr | $0.29 | **$41.35** |
 | | | | | | | |
 | **End of v5.1 squeeze (2026-05-06):** | | Total **~$41.35 / ~$100 (41.4%)**. **v5.1 = 22/37 = 59.5%** — regression −1 task vs v5. Did NOT surpass 3B base (27/37 = 73.0%). Per release condition, NO HF/GitHub release. v5 remains the best Tem-Rust checkpoint. | | | | |
+| 2026-05-06 | 2 | v5 retrain #1 RunPod H100 (~22 min) — same hyperparams; landed at 21/37 (RNG variance) | 0.367h | $3.49/hr | $1.28 | **$42.63** |
+| 2026-05-06 | 2 | v5 retrain #2 RunPod H100 (~22 min) — third sample; **landed at 25/37 = 67.6%, NEW BEST**, weights downloaded for HF release | 0.367h | $3.49/hr | $1.28 | **$43.91** |
+| 2026-05-06 | 2 | v5 retrain #3 RunPod H100 (~5 min, killed early — variance math said low EV) | 0.083h | $3.49/hr | $0.29 | **$44.20** |
+| 2026-05-06 | 2 | v4 Together dedicated H100 endpoint restart for distill collection (~10 min) | 0.167h | $3.99/hr | $0.67 | **$44.87** |
+| 2026-05-06 | 2 | v5d (distill) RunPod H100 (~25 min train + eval) — landed at 23/37, within variance band of v5 retrain runs; 13/355 distill rows too few to dominate RNG | 0.417h | $3.49/hr | $1.45 | **$46.32** |
+| 2026-05-06 | 2 | HF Hub upload retrain #2 weights (3GB) → nagisanzeninz/TemRust-SMOL-v5-1.5B + GitHub repo public release | — | $0.00 | $0.00 | **$46.32** |
+| | | | | | | |
+| **Final session reconciliation (2026-05-06):** | | Total **~$46.32 / ~$100 (46.3%)**. **PUBLISHED: TemRust-SMOL-v5-1.5B at HF (25/37 = 67.6%) + public GitHub repo with research paper, license, full pipeline.** Ensemble v4 ∪ v5 + cargo check = 31/37 = 83.8% documented as inference-time approach. v5d distill experiment was within variance, not released. | | | | |

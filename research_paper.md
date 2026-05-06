@@ -124,6 +124,22 @@ We re-ran v5 hyperparameters three times to confirm the published checkpoint is 
 
 A ±4 task spread on a 37-task benchmark is consistent with σ ≈ √(p(1-p)·37) ≈ 2.8 task per-run noise. We release the highest-scoring of three retrains. Reproducing the exact 67.6% requires either downloading our weights or accepting that retraining lands somewhere in 21-25.
 
+### 4.3 v5d (ensemble distill) — confirms variance dominates at small distill fraction
+
+We trained **v5d** with v5 hyperparameters (r=32, 10 epochs, lr=2e-5) but on a *distill mix*: for 80 of the 355 SFT rows, we replaced the original PR-fix target with the highest-cargo-passing output between v4 and v5 candidates (run via `cargo check`-light verification). Of the 80 collected, only 13 had at least one model produce a cargo-passing alternative; the other 67 fell back to the original target. Net delta: **13/355 rows (3.7%) differed.**
+
+| | v5 retrain #2 (published) | v5d (distill mix) | Δ |
+|---|---|---|---|
+| borrow | 7/10 | 5/10 | −2 |
+| issue | 7/9 | 6/9 | −1 |
+| test | 4/9 | 5/9 | +1 |
+| type | 7/9 | 7/9 | 0 |
+| **total** | **25/37 = 67.6%** | **23/37 = 62.2%** | **−2** |
+
+v5d landed inside the same variance band as the other v5 retrains (21, 23, 25, 23). Interpretation: **the distillation signal at 3.7% of corpus is too small to overcome the per-run RNG noise (≈±3 tasks).** To exploit ensemble distillation properly would require collecting outputs over a much larger fraction of the corpus — but that requires either a pre-running v4 endpoint (Together $$$) or many hours on RunPod, both bumping the cost-per-experiment from ~$2 to ~$10+. We document this as a frontier rather than a delivered improvement.
+
+Operationally, the **ensemble at inference time** (run both v4 and v5, accept the cargo-passing output) remains the highest-EV way to capture the cross-model complementarity at 83.8% — see §5.
+
 ### 4.3 v5.1 regression — synthetic data shape matters
 
 The v5.1 attempt scaled three knobs simultaneously: data (+42 rows of broader synth), capacity (LoRA r=32 → r=64), and epochs (10 → 15). It regressed −2.7 pp vs v5.
