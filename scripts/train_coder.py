@@ -238,7 +238,9 @@ def main() -> int:
 
     def _patched_set_special(self, special_tokens):
         if isinstance(special_tokens, list):
-            special_tokens = {t: None for t in special_tokens}
+            # Token strings act as their own values — older transformers
+            # later setattr(self, name, value) and the value must be str/AddedToken.
+            special_tokens = {t: t for t in special_tokens}
         return _orig_set_special(self, special_tokens)
 
     _tub.PreTrainedTokenizerBase._set_model_specific_special_tokens = _patched_set_special
