@@ -70,8 +70,8 @@ def train(args, tokenizer, model):
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=args.grad_accum,
-        gradient_checkpointing=True,
-        gradient_checkpointing_kwargs={"use_reentrant": False},
+        gradient_checkpointing=args.grad_ckpt,
+        gradient_checkpointing_kwargs={"use_reentrant": False} if args.grad_ckpt else None,
         learning_rate=args.lr,
         lr_scheduler_type="cosine",
         warmup_ratio=0.03,
@@ -81,7 +81,7 @@ def train(args, tokenizer, model):
         report_to="none",
         max_seq_length=args.max_seq_len,
         dataset_text_field="text",
-        packing=False,
+        packing=args.packing,
         optim="adamw_torch",
     )
 
@@ -204,6 +204,11 @@ def main() -> int:
     ap.add_argument("--lora-r", type=int, default=32)
     ap.add_argument("--lora-alpha", type=int, default=64)
     ap.add_argument("--max-seq-len", type=int, default=8192)
+    ap.add_argument("--packing", action="store_true",
+                    help="Enable SFTTrainer packing — concatenates examples to fill max_seq_len. ~3-5x faster on mixed-length corpora.")
+    ap.add_argument("--no-grad-ckpt", dest="grad_ckpt", action="store_false",
+                    help="Disable gradient checkpointing — only safe with 80GB+ VRAM. ~30%% faster.")
+    ap.set_defaults(grad_ckpt=True)
     ap.add_argument("--serve-after-train", action="store_true",
                     help="After training+merge, start a FastAPI server on :8000.")
     ap.add_argument("--skip-train", action="store_true",
