@@ -86,3 +86,8 @@ User asked to be told when running out of quota. Triggers:
 | 2026-05-06 | 2 | HF Hub upload retrain #2 weights (3GB) → nagisanzeninz/TemRust-SMOL-v5-1.5B + GitHub repo public release | — | $0.00 | $0.00 | **$46.32** |
 | | | | | | | |
 | **Final session reconciliation (2026-05-06):** | | Total **~$46.32 / ~$100 (46.3%)**. **PUBLISHED: TemRust-SMOL-v5-1.5B at HF (25/37 = 67.6%) + public GitHub repo with research paper, license, full pipeline.** Ensemble v4 ∪ v5 + cargo check = 31/37 = 83.8% documented as inference-time approach. v5d distill experiment was within variance, not released. | | | | |
+| 2026-05-06 | 2 | v6 IQmax synth via Qwen3-Coder-Next-FP8 teacher: 170/170 high-density CS/math/PLT Q&A pairs, 6-way parallel, ~20 min wall | ~250K tok | $0.85/Mtok blended | ~$1.00 | **$47.32** |
+| 2026-05-06 | 2 | v6 IQmax 3 parallel RunPod H100 retrains (~25 min each) — A=24/37, B=19/37, C=23/37; best 24 < v5's 25, NOT released | 1.25h | $3.49/hr | $4.36 | **$51.68** |
+| 2026-05-06 | 2 | v6 IQmax 3 parallel evals (~5 min each) | 0.25h | $3.49/hr | $0.87 | **$52.55** |
+| | | | | | | |
+| **End of v6 IQmax (2026-05-06 evening):** | | Total **~$52.55 / ~$100 (52.6%)**. **v6 IQmax = best 24/37 = 64.9% — hypothesis NOT confirmed**. Negative result documented (REPORT_v6.md): high-IQ academic prose actually destabilizes training (one variant regressed to base 51.4%); only type category improved (8/9, +1 vs v5). v5 stays as published model. | | | | |

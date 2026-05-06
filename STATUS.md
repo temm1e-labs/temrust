@@ -62,6 +62,9 @@
 | **v5 retrain #2** | **Qwen2.5-Coder-1.5B-Instruct** | **25/37** | **67.6%** | **RunPod H100 DIY** | **PUBLISHED at HF nagisanzeninz/TemRust-SMOL-v5-1.5B**, same hyperparams |
 | v5d (distill) | Qwen2.5-Coder-1.5B-Instruct | 23/37 | 62.2% | RunPod H100 DIY | ensemble-distill mix (13/355 rows differed). Within retrain variance band. NOT released. |
 | **v4 ∪ v5 ensemble + cargo check** | **3.2B total** | **31/37** | **83.8%** | inference-time | beats 3B base 27/37=73.0% by +10.8pp |
+| v6 IQmax variant A | Qwen2.5-Coder-1.5B-Instruct | 24/37 | 64.9% | RunPod H100 DIY | v5 mix + 170 dense reasoning Q&A. **Highest type score (8/9) of any version.** Total below v5. NOT released. |
+| v6 IQmax variant B | Qwen2.5-Coder-1.5B-Instruct | 19/37 | 51.4% | RunPod H100 DIY | regressed to base — IQ data destabilized training. NOT released. |
+| v6 IQmax variant C | Qwen2.5-Coder-1.5B-Instruct | 23/37 | 62.2% | RunPod H100 DIY | within variance. NOT released. |
 
 ## Setup completed
 - [x] All 4 credentials saved to ~/.config/temllm/ (chmod 600)
