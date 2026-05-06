@@ -233,7 +233,15 @@ def main() -> int:
     # tokenizer files (saved during the original train run). Loading from
     # there preserves any tokenizer fixups, special tokens, etc.
     tok_src = args.out if args.skip_train else args.base
-    tokenizer = AutoTokenizer.from_pretrained(tok_src, trust_remote_code=True)
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(tok_src, trust_remote_code=True)
+    except AttributeError as e:
+        # transformers 4.55–4.57 regression on Gemma 4: extra_special_tokens
+        # arrives as a list, code calls .keys(). Slow tokenizer dodges the path.
+        if "'list' object has no attribute 'keys'" not in str(e):
+            raise
+        print("  fast tokenizer hit known regression, falling back to slow", flush=True)
+        tokenizer = AutoTokenizer.from_pretrained(tok_src, trust_remote_code=True, use_fast=False)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 

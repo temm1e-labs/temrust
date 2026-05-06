@@ -4,11 +4,11 @@
 Different stack from v5/v6 launchers because Gemma 4 was released May 2026
 and isn't supported by transformers 4.45.2. Newer compatible pin:
 
-  transformers>=4.55  (Gemma 4 architecture support)
-  peft>=0.14          (compat with new transformers)
-  trl>=0.13           (compat with new transformers, supports tokenizer/processing_class union)
-  accelerate>=1.5
-  datasets>=3.5
+  transformers==4.55.2  (earliest Gemma 4 support; 4.57.x has extra_special_tokens regression)
+  peft==0.14.0          (compat with transformers 4.55)
+  trl==0.13.0           (compat with transformers 4.55, supports tokenizer/processing_class union)
+  accelerate==1.5.0
+  datasets==3.5.0
 
 Image: runpod/pytorch:2.8.0 (torch 2.8 needed for transformers 4.55+).
 
@@ -60,11 +60,11 @@ touch /workspace/setup.log
     set -x
     echo "[$(date +%H:%M:%S)] starting v7-Gemma pod setup"
     pip install --no-cache-dir \
-        "transformers>=4.55,<4.60" \
-        "peft>=0.14" \
-        "trl>=0.13" \
-        "accelerate>=1.5" \
-        "datasets>=3.5" \
+        "transformers==4.55.2" \
+        "peft==0.14.0" \
+        "trl==0.13.0" \
+        "accelerate==1.5.0" \
+        "datasets==3.5.0" \
         "rich>=13" \
         sentencepiece protobuf \
         fastapi uvicorn
