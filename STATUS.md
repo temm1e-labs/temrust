@@ -56,7 +56,8 @@
 | v2 | Qwen3-1.7B (chat) | 19/37 | 51.4% | Together H100 | first to beat base, 220 steps |
 | v3 | Qwen3-1.7B (chat) | 20/37 | 54.1% | Together H100 | 263 ex, 330 steps |
 | v4 | Qwen3-1.7B (chat) | 20/37 | 54.1% | Together H100 | 355 ex (v3 + 92 synthetic), r=32, 230 steps |
-| **v5** | **Qwen2.5-Coder-1.5B-Instruct** | **23/37** | **62.2%** | **RunPod H100 DIY** | **NEW BEST**, same 355 ex as v4, r=32, 285 steps |
+| **v5** | **Qwen2.5-Coder-1.5B-Instruct** | **23/37** | **62.2%** | **RunPod H100 DIY** | **BEST**, same 355 ex as v4, r=32, 285 steps |
+| v5.1 | Qwen2.5-Coder-1.5B-Instruct | 22/37 | 59.5% | RunPod H100 DIY | regression: 397 ex (cleaned PR + broader synth), r=64, 15 epochs, lr=1e-5. Borrow regressed -2; type +1; net -1. NOT released |
 
 ## Setup completed
 - [x] All 4 credentials saved to ~/.config/temllm/ (chmod 600)

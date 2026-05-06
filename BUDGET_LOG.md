@@ -73,3 +73,8 @@ User asked to be told when running out of quota. Triggers:
 | 2026-05-06 | 2 | v5 RunPod H100 SXM5 v7 (30 min) — training + serving + eval **SUCCESS: 23/37 = 62.2%** with Qwen2.5-Coder-1.5B-Instruct base (`hf8x39e7cmbidw` superseded by `0wqhj6hl65talx`) | 0.500h | $3.49/hr | $1.75 | **$38.49** |
 | | | | | | | |
 | **End of v5 reconciliation (2026-05-06):** | | Total **~$38.49 / ~$100 (38.5%)**. **NEW BEST: v5 = 23/37 = 62.2%** with Qwen2.5-Coder-1.5B-Instruct + same v4 SFT mix on RunPod H100 DIY. The 1.7B chat-base ceiling is broken — Coder pretraining matters more than ~200M extra params here. | | | | |
+| 2026-05-06 | 2 | v5.1 synth via Qwen3-Coder-Next-FP8 teacher: 30 borrow + 20 type + 20 test = 69/70 kept | ~140K tok | $0.85/Mtok blended | ~$1.00 | **$39.49** |
+| 2026-05-06 | 2 | v5.1 RunPod H100 SXM5 train (27 min) — r=64 alpha=128, 15 epochs, lr=1e-5, 397 rows, 765 steps. **Eval 22/37 = 59.5%, regression vs v5** | 0.450h | $3.49/hr | $1.57 | **$41.06** |
+| 2026-05-06 | 2 | v5.1 H100 eval (~5 min) | 0.083h | $3.49/hr | $0.29 | **$41.35** |
+| | | | | | | |
+| **End of v5.1 squeeze (2026-05-06):** | | Total **~$41.35 / ~$100 (41.4%)**. **v5.1 = 22/37 = 59.5%** — regression −1 task vs v5. Did NOT surpass 3B base (27/37 = 73.0%). Per release condition, NO HF/GitHub release. v5 remains the best Tem-Rust checkpoint. | | | | |
