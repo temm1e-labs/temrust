@@ -76,48 +76,40 @@ def gql_pod(pod_id: str) -> dict:
 
 
 # Bash command run as the pod entrypoint. Single string passed to `bash -lc`.
-# - Installs SFT deps (peft, trl, bitsandbytes, accelerate, datasets) and vllm
-# - Clones the private temrust repo via GH_TOKEN
-# - Runs the training script
-# - Launches vllm serving the merged model
+# Design: run all heavy work in a backgrounded subshell, then `exec tail -f
+# /dev/null` so the container stays alive even if training/serving crashes.
+# All output → /workspace/setup.log so we can `runpodctl exec cat` it for debug.
+# We skip vllm entirely — the training script's `--serve-after-train` mode
+# stands up a transformers+FastAPI HTTP server on the same port. Slower
+# inference (~5x) but no version-conflict risk and fewer pip installs.
 TRAIN_AND_SERVE = r"""
-set -ex
+mkdir -p /workspace
 cd /workspace
-echo "[$(date +%H:%M:%S)] starting pod setup"
-pip install --quiet --no-cache-dir transformers==4.46.0 peft==0.13.2 trl==0.12.0 accelerate==1.1.0 datasets==3.0.2 bitsandbytes
-echo "[$(date +%H:%M:%S)] sft deps installed"
-pip install --quiet --no-cache-dir vllm==0.6.3
-echo "[$(date +%H:%M:%S)] vllm installed"
+(
+    set -x
+    echo "[$(date +%H:%M:%S)] starting pod setup"
+    pip install --no-cache-dir peft trl accelerate datasets fastapi uvicorn
+    echo "[$(date +%H:%M:%S)] deps installed"
+    git clone "https://${GH_TOKEN}@github.com/temm1e-labs/temrust.git" /workspace/temrust
+    cd /workspace/temrust
+    echo "[$(date +%H:%M:%S)] repo cloned, starting training"
+    python scripts/train_coder.py \
+        --base Qwen/Qwen2.5-Coder-1.5B-Instruct \
+        --data data/clean/sft_wholefile_v4.jsonl \
+        --out /workspace/merged \
+        --epochs 10 \
+        --batch-size 4 \
+        --grad-accum 2 \
+        --lr 2e-5 \
+        --lora-r 32 \
+        --lora-alpha 64 \
+        --max-seq-len 8192 \
+        --serve-after-train
+    echo "[$(date +%H:%M:%S)] training script exited"
+) > /workspace/setup.log 2>&1 &
 
-# Clone private temrust repo (data + scripts)
-git clone "https://${GH_TOKEN}@github.com/temm1e-labs/temrust.git" /workspace/temrust
-cd /workspace/temrust
-echo "[$(date +%H:%M:%S)] repo cloned"
-
-# Train (single GPU, ~30-60 min on a 5090 for 355 ex × 10 epochs)
-python scripts/train_coder.py \
-    --base Qwen/Qwen2.5-Coder-1.5B-Instruct \
-    --data data/clean/sft_wholefile_v4.jsonl \
-    --out /workspace/merged \
-    --epochs 10 \
-    --batch-size 4 \
-    --grad-accum 2 \
-    --lr 2e-5 \
-    --lora-r 32 \
-    --lora-alpha 64 \
-    --max-seq-len 8192 2>&1 | tee /workspace/train.log
-
-echo "[$(date +%H:%M:%S)] training done, starting vllm"
-
-# Serve merged model — vllm without --enable-lora is more stable than the
-# LoRA-enabled path. Trade-off: ~3GB extra disk, fine on 30GB containerDisk.
-exec python -m vllm.entrypoints.openai.api_server \
-    --model /workspace/merged \
-    --served-model-name tem-rust-v5 \
-    --host 0.0.0.0 \
-    --port 8000 \
-    --max-model-len 16384 \
-    --dtype auto
+# Keep the entrypoint alive regardless of subshell outcome.
+exec tail -f /dev/null
 """
 
 
