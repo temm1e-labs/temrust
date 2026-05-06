@@ -100,11 +100,11 @@ touch /workspace/setup.log
     # 4.46+ MoE/FP8 modules. The v1 5090 pod and v2 first H100 attempt both
     # crashed silently on `import transformers` because of this.
     pip install --no-cache-dir \
-        "transformers>=4.44,<4.46" \
-        "peft>=0.13,<0.14" \
-        "trl>=0.11,<0.13" \
-        "accelerate>=1.0,<1.2" \
-        "datasets>=3.0,<3.2" \
+        "transformers==4.45.2" \
+        "peft==0.13.2" \
+        "trl==0.11.4" \
+        "accelerate==1.0.1" \
+        "datasets==3.0.2" \
         fastapi uvicorn
     echo "[$(date +%H:%M:%S)] deps installed"
     git clone "https://${GH_TOKEN}@github.com/temm1e-labs/temrust.git" /workspace/temrust
