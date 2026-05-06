@@ -14,11 +14,11 @@
 - **v0 (diff SFT, 76 ex, 9 steps):** 12/37 = 32.4% — regression
 - **v1 (whole-file SFT, 79 ex, 9 steps):** 11/37 = 29.7% — regression. Controlled experiment: format isn't the bottleneck.
 - **v2 (chat base + whole-file SFT, 176 ex, 220 steps):** 19/37 = 51.4% — first to beat base.
-- **v3 (chat base + whole-file SFT, 263 ex, 330 steps):** **20/37 = 54.1%** ✓ best. +19 points over base, +2.7 over Qwen2.5-Coder-1.5B-Instruct. Bar to beat (3B): 73.0%, ~19 points away.
-- v0→v1→v2→v3 isolated four knobs: format (irrelevant at scale), base+steps+data (the breakout), more-of-same (diminishing returns).
-- v2 crawler loosened filters → 271 candidates / 33 repos. v3 crawler bumped scale → 396 candidates from ~35 repos before killed for time.
-- All four dedicated endpoints confirmed STOPPED.
-- Total session spend: **~$24.44 / $75.00 (32.6%)**. v3 fine-tune first to exceed $4 floor at $8.50.
+- **v3 (chat base + whole-file SFT, 263 ex, 330 steps):** 20/37 = 54.1% — diminishing returns confirmed.
+- **v4 (chat base + 263 PR + 41 synth-test + 51 synth-borrow, LoRA r=32, 230 steps):** **20/37 = 54.1%** — tied v3 (borrow +1 from synthetic archetypes; test −1, synthetic teacher tests didn't transfer).
+- 1.7B ceiling on this benchmark appears to be ~55%. Next leap requires a bigger base (Qwen2.5-3B-Instruct).
+- All five dedicated endpoints confirmed STOPPED.
+- Total session spend: **~$33.77 / ~$100.00 (33.8%, after Together top-up)**.
 
 ## Phase 0 progress (2026-05-05 → 2026-05-06)
 

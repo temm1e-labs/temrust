@@ -60,4 +60,10 @@ User asked to be told when running out of quota. Triggers:
 | 2026-05-06 | 1 | Together fine-tune **v3** Qwen3-1.7B (chat) + LoRA, 10 epochs, bs=8, **330 steps**, ~19M training tokens → `quanduong/Qwen3-1.7B-tem-rust-v3-e6812363` — **first run past $4 floor** | 19M tok | $0.40/Mtok | $8.50 | **$23.73** |
 | 2026-05-06 | 1 | Together H100 endpoint `endpoint-f06c9fb4-...` for v3 eval (started 03:02:44Z → STOPPED 03:13:24Z = 10.7 min; first eval crashed mid-run on endpoint flap, second eval after retry+backoff added) | 0.178h | $3.99/hr | $0.71 | **$24.44** |
 | | | | | | | |
-| **End of session reconciliation (2026-05-06):** | | Total **$24.44 / $75.00 (32.6%)**. Results: v0=32.4%, v1=29.7%, v2=51.4%, **v3=54.1% (best)** vs base 35.1% and 3B bar 73.0%. | | | | |
+| **Mid-session checkpoint (after v3):** | | Total **$24.44 / $75.00 (32.6%)**. Results: v0=32.4%, v1=29.7%, v2=51.4%, **v3=54.1%** vs base 35.1% and 3B bar 73.0%. | | | | |
+| 2026-05-06 | 1 | Together synthetic data gen (Qwen3-Coder-Next teacher serverless): 41 test-gen + 51 borrow-archetype examples → `data/clean/sft_synthetic.jsonl` | ~80K tok | $0.85/Mtok blended | ~$1.00 | **$25.44** |
+| 2026-05-06 | 1 | **User topped up Together by $25** to enable v4 fine-tune (was $1.72 below the $4 minimum-job floor) | | | | |
+| 2026-05-06 | 1 | Together fine-tune **v4** Qwen3-1.7B (chat) + LoRA r=32 alpha=64, 10 epochs, bs=8, **230 steps**, ~20M training tokens → `quanduong/Qwen3-1.7B-tem-rust-v4-f65a2ac9` | 20M tok | $0.40/Mtok | $8.99 | **$34.43** |
+| 2026-05-06 | 1 | Together H100 endpoint `endpoint-6c994e78-...` for v4 eval (created 03:50:34Z → STOPPED 03:55:42Z = 5.1 min) | 0.085h | $3.99/hr | $0.34 | **$34.77** |
+| | | | | | | |
+| **End of session reconciliation (2026-05-06):** | | Total **~$33.77 / ~$100 (33.8%, after Together top-up)**. Results: v0=32.4%, v1=29.7%, v2=51.4%, v3=54.1%, **v4=54.1%** (tied v3 — borrow +1, test −1). 1.7B ceiling appears at ~55%. | | | | |
